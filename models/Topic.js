@@ -9,7 +9,8 @@ const TopicSchema = new Schema({
   slug: {
     type: String,
     lowercase: true,
-    required: true
+    required: true,
+    unique: true
   }
 });
 

@@ -33,7 +33,7 @@ There are also some methods that can be called on the documents that get returne
 
 Data has been provided for both testing and development environments so you will need to write a seed function to seed your database. You should think about how you will write your seed file to use either test data or dev data depending on the environment that you're running in.
 
-1.  You will need to seed the topics, followed by the articles and the users. Each article should belong to a topic, referenced by a topic's \_id property. Each article should also have a random number of comments. Each comment should have been created by a random user (referenced by their \_id property) and should also belong to a specific article (referenced by its \_id property too). Use a library such as [faker](https://www.npmjs.com/package/faker) or [chance](https://www.npmjs.com/package/chance) to generate random comments.
+1.  You will need to seed the topics, followed by the articles and the users. Each article should belong to a topic, referenced by a topic's slug property. Each article should also have comments associated with it. Each comment should have been created by a user (referenced by their \_id property) and should also belong to a specific article (referenced by its \_id property too).
 
 ### Step 2 - Building and Testing
 
@@ -49,77 +49,77 @@ Data has been provided for both testing and development environments so you will
 
 ### Routes
 
-``` http
+```http
 GET /api
 ```
 
 Serves an HTML page with documentation for all the available endpoints
 
-``` http
+```http
 GET /api/topics
 ```
 
 Get all the topics
 
-``` http
+```http
 GET /api/topics/:topic_id/articles
 ```
 
 Return all the articles for a certain topic
 
-``` http
+```http
 POST /api/topics/:topic_id/articles
 ```
 
 Add a new article to a topic. This route requires a JSON body with title and body key value pairs
 e.g: `{ "title": "this is my new article title", "body": "This is my new article content"}`
 
-``` http
+```http
 GET /api/articles
 ```
 
 Returns all the articles
 
-``` http
+```http
 GET /api/articles/:article_id
 ```
 
 Get an individual article
 
-``` http
+```http
 GET /api/articles/:article_id/comments
 ```
 
 Get all the comments for a individual article
 
-``` http
+```http
 POST /api/articles/:article_id/comments
 ```
 
 Add a new comment to an article. This route requires a JSON body with a comment key and value pair
 e.g: `{"comment": "This is my new comment"}`
 
-``` http
+```http
 PUT /api/articles/:article_id
 ```
 
 Increment or Decrement the votes of an article by one. This route requires a vote query of 'up' or 'down'
 e.g: `/api/articles/:article_id?vote=up`
 
-``` http
+```http
 PUT /api/comments/:comment_id
 ```
 
 Increment or Decrement the votes of a comment by one. This route requires a vote query of 'up' or 'down'
 e.g: `/api/comments/:comment_id?vote=down`
 
-``` http
+```http
 DELETE /api/comments/:comment_id
 ```
 
 Deletes a comment
 
-``` http
+```http
 GET /api/users/:username
 ```
 
