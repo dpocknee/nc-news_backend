@@ -49,11 +49,13 @@ Data has been provided for both testing and development environments so you will
 
 ### Routes
 
+
+Your server should have the following end-points:
 ```http
 GET /api
 ```
-
 Serves an HTML page with documentation for all the available endpoints
+
 
 ```http
 GET /api/topics
@@ -62,17 +64,17 @@ GET /api/topics
 Get all the topics
 
 ```http
-GET /api/topics/:topic_id/articles
+GET /api/topics/:topic_slug/articles
 ```
 
 Return all the articles for a certain topic
 
 ```http
-POST /api/topics/:topic_id/articles
+POST /api/topics/:topic_slug/articles
 ```
 
 Add a new article to a topic. This route requires a JSON body with title and body key value pairs
-e.g: `{ "title": "this is my new article title", "body": "This is my new article content"}`
+e.g: `{ "title": "new article", "body": "This is my new article content"}`
 
 ```http
 GET /api/articles
