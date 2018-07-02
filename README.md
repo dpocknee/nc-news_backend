@@ -33,7 +33,7 @@ There are also some methods that can be called on the documents that get returne
 
 Data has been provided for both testing and development environments so you will need to write a seed function to seed your database. You should think about how you will write your seed file to use either test data or dev data depending on the environment that you're running in.
 
-1.  You will need to seed the topics, followed by the articles and the users. Each article should belong to a topic, referenced by a topic's slug property. Each article should also have comments associated with it. Each comment should have been created by a user (referenced by their \_id property) and should also belong to a specific article (referenced by its \_id property too).
+1.  You will need to seed the topics, followed by the articles and the users. Each article should belong to a topic, referenced by a topic's \_id property. Each article should also have comments associated with it. Each comment should have been created by a user (referenced by their \_id property) and should also belong to a specific article (referenced by its \_id property too).
 
 ### Step 2 - Building and Testing
 
@@ -64,13 +64,13 @@ GET /api/topics
 Get all the topics
 
 ```http
-GET /api/topics/:topic_slug/articles
+GET /api/topics/:topic_id/articles
 ```
 
 Return all the articles for a certain topic
 
 ```http
-POST /api/topics/:topic_slug/articles
+POST /api/topics/:topic_id/articles
 ```
 
 Add a new article to a topic. This route requires a JSON body with title and body key value pairs
@@ -98,8 +98,8 @@ Get all the comments for a individual article
 POST /api/articles/:article_id/comments
 ```
 
-Add a new comment to an article. This route requires a JSON body with a comment key and value pair
-e.g: `{"comment": "This is my new comment"}`
+Add a new comment to an article. This route requires a JSON body with body and created_by key value pairs
+e.g: `{"body": "This is my new comment", "created_by": <mongo id for a user>}`
 
 ```http
 PUT /api/articles/:article_id
@@ -126,6 +126,9 @@ GET /api/users/:username
 ```
 
 Returns a JSON object with the profile data for the specified user.
+
+
+NOTE: When it comes to building your front end you'll find it useful to have the `belongs_to` property of your `articles` populated with the corresponding topic objects.
 
 ### Step 3 - Hosting
 
