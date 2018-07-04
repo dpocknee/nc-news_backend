@@ -128,7 +128,9 @@ GET /api/users/:username
 Returns a JSON object with the profile data for the specified user.
 
 
-NOTE: When it comes to building your front end you'll find it useful to have the `belongs_to` property of your `articles` populated with the corresponding topic objects.
+
+NOTE: When it comes to building your front end you'll find it useful to have the `belongs_to` property of your `articles` populated with the corresponding topic objects. You'll also find it extremely handy if your POST comment endpoint returns the new comment with the created_by property populated with the corresponding user object.
+
 
 ### Step 3 - Hosting
 
