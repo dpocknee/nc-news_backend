@@ -67,7 +67,7 @@ Get all the topics
 GET /api/topics/:topic_slug/articles
 ```
 
-Return all the articles for a certain topic example(`/api/topics/football/articles`)
+Return all the articles for a certain topic, e.g: `/api/topics/football/articles`
 
 ```http
 POST /api/topics/:topic_id/articles
@@ -125,7 +125,7 @@ Deletes a comment
 GET /api/users/:username
 ```
 
-example(`/api/users/mitch123`)
+e.g: `/api/users/mitch123`
 
 Returns a JSON object with the profile data for the specified user.
 
