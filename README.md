@@ -33,7 +33,7 @@ There are also some methods that can be called on the documents that get returne
 
 Data has been provided for both testing and development environments so you will need to write a seed function to seed your database. You should think about how you will write your seed file to use either test data or dev data depending on the environment that you're running in.
 
-1.  You will need to seed the topics, followed by the articles and the users. Each article should belong to a topic, referenced by a topic's \_id property. Each article should also have comments associated with it. Each comment should have been created by a user (referenced by their \_id property) and should also belong to a specific article (referenced by its \_id property too).
+1.  You will need to seed the topics, followed by the articles and the users. Each article should belong to a topic, referenced by a topic's mongo id, and have a `created_by` property that references a user's mongo id. Each article should also have comments associated with it. Each comment should have been created by a user (referenced by their mongo id property) and should also belong to a specific article (referenced by its mongo id property too).
 
 ### Step 2 - Building and Testing
 
@@ -64,10 +64,10 @@ GET /api/topics
 Get all the topics
 
 ```http
-GET /api/topics/:topic_id/articles
+GET /api/topics/:topic_slug/articles
 ```
 
-Return all the articles for a certain topic
+Return all the articles for a certain topic example(`/api/topics/football/articles`)
 
 ```http
 POST /api/topics/:topic_id/articles
@@ -125,12 +125,12 @@ Deletes a comment
 GET /api/users/:username
 ```
 
+example(`/api/users/mitch123`)
+
 Returns a JSON object with the profile data for the specified user.
 
 
-
-NOTE: When it comes to building your front end you'll find it useful to have the `belongs_to` property of your `articles` populated with the corresponding topic objects. You'll also find it extremely handy if your POST comment endpoint returns the new comment with the created_by property populated with the corresponding user object.
-
+NOTE: When it comes to building your front end you'll find it extremely useful to have the `belongs_to` property of your `articles` populated with the corresponding topic objects. You'll also find it handy if your POST comment endpoint returns the new comment with the created_by property populated with the corresponding user object.
 
 ### Step 3 - Hosting
 
