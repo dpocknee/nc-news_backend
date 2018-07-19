@@ -70,7 +70,7 @@ GET /api/topics/:topic_slug/articles
 Return all the articles for a certain topic, e.g: `/api/topics/football/articles`
 
 ```http
-POST /api/topics/:topic_id/articles
+POST /api/topics/:topic_slug/articles
 ```
 
 Add a new article to a topic. This route requires a JSON body with title and body key value pairs
