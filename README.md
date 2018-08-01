@@ -130,7 +130,7 @@ e.g: `/api/users/mitch123`
 Returns a JSON object with the profile data for the specified user.
 
 
-NOTE: When it comes to building your front end you'll find it extremely useful to have the `belongs_to` property of your `articles` populated with the corresponding topic objects. You'll also find it handy if your POST comment endpoint returns the new comment with the created_by property populated with the corresponding user object.
+NOTE: When it comes to building your front end you'll find it extremely useful if your POST comment endpoint returns the new comment with the created_by property populated with the corresponding user object.
 
 ### Step 3 - Hosting
 
