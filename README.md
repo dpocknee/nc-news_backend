@@ -66,7 +66,7 @@ GET /api/topics/:topic_slug/articles
 ```http
 POST /api/topics/:topic_slug/articles
 # Add a new article to a topic. This route requires a JSON body with title and body key value pairs
-# e.g: `{ "title": "new article", "body": "This is my new article content", "created_by": user_id}`
+# e.g: `{ "title": "new article", "body": "This is my new article content", "created_by": "user_id goes here"}`
 ```
 
 ```http
@@ -87,7 +87,7 @@ GET /api/articles/:article_id/comments
 ```http
 POST /api/articles/:article_id/comments
 # Add a new comment to an article. This route requires a JSON body with body and created_by key value pairs
-e.g: `{"body": "This is my new comment", "created_by": user_id}`
+e.g: `{"body": "This is my new comment", "created_by": "user_id goes here"}`
 ```
 
 ```http
