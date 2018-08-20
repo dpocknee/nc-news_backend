@@ -60,7 +60,8 @@ GET /api/topics
 
 ```http
 GET /api/topics/:topic_slug/articles
-# Return all the articles for a certain topic, e.g: `/api/topics/football/articles`
+# Return all the articles for a certain topic
+# e.g: `/api/topics/football/articles`
 ```
 
 ```http
@@ -87,7 +88,7 @@ GET /api/articles/:article_id/comments
 ```http
 POST /api/articles/:article_id/comments
 # Add a new comment to an article. This route requires a JSON body with body and created_by key value pairs
-e.g: `{"body": "This is my new comment", "created_by": "user_id goes here"}`
+# e.g: `{"body": "This is my new comment", "created_by": "user_id goes here"}`
 ```
 
 ```http
