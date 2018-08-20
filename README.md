@@ -43,7 +43,7 @@ Data has been provided for both testing and development environments so you will
 4.  Define controller functions for each of your routes
 5.  Use proper project configuration from the offset, being sure to treat development and test differently.
 6.  Test each route as you go. Remember to test the happy and the unhappy paths! Make sure your error messages are helpful and your error status codes are chosen correctly. Remember to seed the test database using the seeding function and make the saved data available to use within your test suite.
-7.  Once you have all your routes start to tackle responding with the vote and comment counts on article requests like this http://northcoders-news-api.herokuapp.com/api/articles
+7.  Once you have all your routes start to tackle responding with the comment counts on article requests like this http://northcoders-news-api.herokuapp.com/api/articles
 
 **HINT** Make sure to drop and reseed your test database with every test. This will make it much easier to keep track of your data throughout. In order for this to work, you are going to need to keep track of the MongoIDs your seeded docs have been given. In order to do this, you might want to consider what your seed file returns, and how you can use this in your tests.
 
