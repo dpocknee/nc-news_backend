@@ -30,8 +30,8 @@ mongoose
     return Promise.all([seedDB(Topic, topicsData), seedDB(User, usersData)]);
   })
   .then(([seededTopics, seededUsers]) => {
-    const topicRefObj = buildRefObject(seededTopics, 'slug');
-    const userRefObj = buildRefObject(seededUsers, 'username');
+    const topicRefObj = buildRefObject(seededTopics, 'slug', 'slug');
+    const userRefObj = buildRefObject(seededUsers, 'username', '_id');
     const formattedArticles = formatData(
       articlesData,
       topicRefObj,
@@ -39,14 +39,11 @@ mongoose
       userRefObj,
       'created_by'
     );
+    console.log(topicRefObj);
     return Promise.all([seedDB(Article, formattedArticles), userRefObj]);
   })
   .then(([seededArticle, userRefObj]) => {
-    console.log(seededArticle);
-    // a created_by property that references a user's mongo _id and
-    // a belongs_to property that references the specific article's mongo _id.
-
-    const articleRefObject = buildRefObject(seededArticle, 'title');
+    const articleRefObject = buildRefObject(seededArticle, 'title', '_id');
     const formattedComments = formatData(
       commentsData,
       articleRefObject,
@@ -54,13 +51,9 @@ mongoose
       userRefObj,
       'created_by'
     );
-    // console.log('formatted Comments ', formattedComments);
     return seedDB(Comment, formattedComments);
   })
   .then(() => {
     mongoose.disconnect();
   })
-  .catch(
-    console.log
-    //{ status: 500, msg: 'Database not seeded.' }
-  );
+  .catch({ status: 500, msg: 'Database not seeded.' });

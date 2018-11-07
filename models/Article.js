@@ -20,6 +20,8 @@ const ArticleSchema = new Schema({
     default: Date.now
   },
   belongs_to: {
+    // type: mongoose.Schema.Types.ObjectId,
+    // ref: 'topics',
     type: String,
     required: true
   },

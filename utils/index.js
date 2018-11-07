@@ -1,3 +1,10 @@
+const buildRefObject = (seededData, targetKey, sourceKey) => {
+  return seededData.reduce((referenceObject, currentData) => {
+    referenceObject[currentData[targetKey]] = currentData[sourceKey];
+    return referenceObject;
+  }, {});
+};
+
 const formatData = (
   inputData,
   firstReferenceObject,
@@ -12,13 +19,6 @@ const formatData = (
       created_by: secondReferenceObject[datum[secondReferenceKey]]
     };
   });
-};
-
-const buildRefObject = (seededData, targetKey) => {
-  return seededData.reduce((referenceObject, currentData) => {
-    referenceObject[currentData[targetKey]] = currentData._id;
-    return referenceObject;
-  }, {});
 };
 
 module.exports = {
