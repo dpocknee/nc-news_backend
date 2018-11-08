@@ -3,11 +3,15 @@ const app = require('../app');
 const request = require('supertest')(app);
 const { expect } = require('chai');
 const createSeed = require('../seed/createSeed');
+const mongoose = require('mongoose');
+const config = require('../config');
+const { Topic, Article, Comment, User } = require('../models/');
 
 describe('/api', () => {
-  // beforeEach(() => {
-  //   return createSeed();
-  // });
+  before(() => {});
+  beforeEach(() => {
+    return createSeed();
+  });
   it('GET return status 200 a html page of imformation', () => {
     return request
       .get('/api')
@@ -65,6 +69,65 @@ describe('/api', () => {
             expect(res.body.message).to.equal('jam is not a valid topic!');
           });
       });
+      it('POST status 201 adds a new article to a topic (checks content)', () => {
+        const testArticle = {
+          title: 'new article',
+          body: 'This is my new article content',
+          created_by: '5be429573f197521ab42196b'
+        };
+        return request
+          .post('/api/topics/cats/articles')
+          .send(testArticle)
+          .expect(201)
+          .then(res => {
+            expect(res.body).to.include(testArticle);
+          });
+      });
+      // it('POST status 404 adds a', () => {
+
+      // });
+      // xit('POST status 201 adds a new article to a topic (checks number)', () => {
+      //   return mongoose
+      //     .connect(config.DB_URL)
+      //     .then(() => {
+      //       return Article.find();
+      //     })
+      //     .then(originalDocs => {
+      //       return Promise.all([originalDocs, mongoose.disconnect()]);
+      //     })
+      //     .then(([originalDocs, placeholder]) => {
+      //       return Promise.all([
+      //         request.post('/api/topics/cats/articles').send({
+      //           title: 'new article',
+      //           body: 'This is my new article content',
+      //           created_by: '5be429573f197521ab42196b'
+      //         }),
+      //         originalDocs
+      //       ]);
+      //     })
+      //     .then(([res, originalDocs]) => {
+      //       return Promise.all([
+      //         res,
+      //         originalDocs,
+      //         mongoose.connect(config.DB_URL)
+      //       ]);
+      //     })
+      //     .then(([res, originalDocs, placeholder]) => {
+      //       return Promise.all([res, originalDocs, Article.find()]);
+      //     })
+      //     .then(([res, oldCount, newCount]) => {
+      //       return Promise.all([
+      //         res,
+      //         oldCount,
+      //         newCount,
+      //         mongoose.disconnect()
+      //       ]);
+      //     })
+      //     .then(([res, oldCount, newCount, placeholder]) => {
+      //       expect(newCount.length).to.equal(oldCount.length + 2);
+      //     })
+      //     .catch(console.log);
+      // });
     });
   });
 });

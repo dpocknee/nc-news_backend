@@ -25,11 +25,8 @@ const topicsData = require(`./${currentEnv}Data/topics.json`);
 const usersData = require(`./${currentEnv}Data/users.json`);
 
 const createSeed = () => {
-  mongoose
-    .connect(
-      config.DB_URL,
-      { useNewUrlParser: true }
-    )
+  return mongoose
+    .connect(config.DB_URL)
     .then(() => {
       return mongoose.connection.dropDatabase();
     })
@@ -46,7 +43,6 @@ const createSeed = () => {
         userRefObj,
         'created_by'
       );
-      // console.log(topicRefObj);
       return Promise.all([seedDB(Article, formattedArticles), userRefObj]);
     })
     .then(([seededArticle, userRefObj]) => {
@@ -61,9 +57,10 @@ const createSeed = () => {
       return seedDB(Comment, formattedComments);
     })
     .then(() => {
+      console.log('Databases seeded');
       mongoose.disconnect();
     })
-    .catch({ status: 500, msg: 'Database not seeded.' });
+    .catch({ status: 500, msg: 'Databases not seeded.' });
 };
 
 module.exports = createSeed;

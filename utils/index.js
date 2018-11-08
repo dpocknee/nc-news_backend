@@ -25,3 +25,14 @@ module.exports = {
   buildRefObject,
   formatData
 };
+
+const countAmount = model => {
+  return mongoose
+    .connect(config.DB_URL)
+    .then(() => {
+      return Article.find();
+    })
+    .then(originalDocs => {
+      return Promise.all([originalDocs, mongoose.disconnect()]);
+    });
+};

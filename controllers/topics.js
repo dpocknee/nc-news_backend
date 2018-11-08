@@ -55,3 +55,29 @@ exports.getTopicsByArticle = (req, res, next) => {
     })
     .catch(next);
 };
+
+exports.addArticleByTopic = (req, res, next) => {
+  mongoose
+    .connect(config.DB_URL)
+    .then(() => {
+      const newArticle = new Article({
+        title: req.body.title,
+        body: req.body.body,
+        belongs_to: req.params.topic_slug,
+        created_by: req.body.created_by
+      });
+      return newArticle.save();
+    })
+    .then(postedArticle => {
+      console.log(postedArticle);
+      return Article.find(postedArticle).populate('created_by');
+    })
+    .then(populatedArticle => {
+      console.log(populatedArticle);
+      res.status(201).send(populatedArticle);
+    })
+    .then(() => {
+      mongoose.disconnect();
+    })
+    .catch(next);
+};
