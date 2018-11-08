@@ -46,7 +46,9 @@ exports.getTopicsByArticle = (req, res, next) => {
       }
     })
     .then(foundArticles => {
-      res.status(200).send(foundArticles);
+      if (foundArticles !== undefined) {
+        return res.status(200).send(foundArticles);
+      } else return foundArticles;
     })
     .then(() => {
       mongoose.disconnect();

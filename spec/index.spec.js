@@ -57,12 +57,12 @@ describe('/api', () => {
             expect(res.body[0].body).to.equal('Well? Think about it.');
           });
       });
-      it('GET status 404 returns message "jam is not a valid topic"', () => {
+      it('GET status 404 returns message "x is not a valid topic"', () => {
         return request
           .get('/api/topics/jam/articles')
           .expect(404)
           .then(res => {
-            expect(res.message).to.equal('jam is not a valid topic');
+            expect(res.body.message).to.equal('jam is not a valid topic!');
           });
       });
     });

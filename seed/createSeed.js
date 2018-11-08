@@ -46,7 +46,7 @@ const createSeed = () => {
         userRefObj,
         'created_by'
       );
-      console.log(topicRefObj);
+      // console.log(topicRefObj);
       return Promise.all([seedDB(Article, formattedArticles), userRefObj]);
     })
     .then(([seededArticle, userRefObj]) => {
