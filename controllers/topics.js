@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { config } = require('../config');
+const config = require('../config');
 const { Topic, Article, Comment, User } = require('../models/');
 
 exports.getDefault = (req, res, next) => {
@@ -7,17 +7,17 @@ exports.getDefault = (req, res, next) => {
 };
 
 exports.getTopics = (req, res, next) => {
+  // All topics
   mongoose
-    .connect(
-      config.DB_URL,
-      { useNewUrlParser: true }
-    )
+    .connect(config.DB_URL)
     .then(() => {
-      // All topics
       return Topic.find();
     })
     .then(foundTopics => {
       res.send(foundTopics);
+    })
+    .then(() => {
+      mongoose.disconnect();
     })
     .catch(next);
 };
@@ -25,13 +25,15 @@ exports.getTopics = (req, res, next) => {
 exports.getTopicsByArticle = (req, res, next) => {
   // topics/:topic_slug/articles
   mongoose
-    .connect(
-      config.DB_URL,
-      { useNewUrlParser: true }
-    )
+    .connect(config.DB_URL)
     .then(() => {
-      // All topics
-      const possibleRoutes = ['coding', 'football', 'cooking'];
+      return Topic.find();
+    })
+    .then(topics => {
+      const possibleRoutes = topics.reduce((routesArray, topic) => {
+        routesArray.push(topic.slug);
+        return routesArray;
+      }, []);
       if (!possibleRoutes.includes(req.params.topic_slug)) {
         return next({
           status: 404,
@@ -45,6 +47,9 @@ exports.getTopicsByArticle = (req, res, next) => {
     })
     .then(foundArticles => {
       res.status(200).send(foundArticles);
+    })
+    .then(() => {
+      mongoose.disconnect();
     })
     .catch(next);
 };
