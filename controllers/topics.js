@@ -27,7 +27,7 @@ exports.getTopics = (req, res, next) => {
     .catch(next);
 };
 
-exports.getTopicsByArticle = (req, res, next) => {
+exports.getArticlesByTopic = (req, res, next) => {
   // topics/:topic_slug/articles
   return mongoose
     .connect(config.DB_URL)

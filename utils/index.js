@@ -34,6 +34,15 @@ const getArrayOfValidElements = (model, typeOfInfo) => {
     .catch(console.log);
 };
 
+const errorCreator = (validArray, toCompare, status, model, next) => {
+  if (!validArray.includes(toCompare)) {
+    return next({
+      status: status,
+      msg: `${toCompare} is not a valid ${model}!`
+    });
+  }
+};
+
 const commentCount = (comments, commentType, topic, slug, cats) => {
   // countAmount(modelToSearch, parameterToSearch, Topic, 'slug')
   // topic
@@ -42,7 +51,7 @@ const commentCount = (comments, commentType, topic, slug, cats) => {
     .where(slug)
     .equals(cats)
     .then(() => {
-      return comments.find().populate('belongs_to');
+      return comments.find().populate(commentType);
     })
     .then(commentsArray => {
       return commentsArray.reduce((accum, comment) => {
@@ -50,15 +59,6 @@ const commentCount = (comments, commentType, topic, slug, cats) => {
       }, 0);
     })
     .catch(console.log);
-};
-
-const errorCreator = (validArray, toCompare, status, model, next) => {
-  if (!validArray.includes(toCompare)) {
-    return next({
-      status: status,
-      msg: `${toCompare} is not a valid ${model}!`
-    });
-  }
 };
 
 module.exports = {

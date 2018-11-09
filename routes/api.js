@@ -2,17 +2,19 @@ const apiRouter = require('express').Router();
 const {
   getDefault,
   getTopics,
-  getTopicsByArticle,
+  getArticlesByTopic,
   addArticleByTopic
 } = require('../controllers/topics');
+const { getArticles } = require('../controllers/articles');
 
 apiRouter.route('/').get(getDefault);
 apiRouter.route('/topics').get(getTopics);
 apiRouter
   .route('/topics/:topic_slug/articles')
-  .get(getTopicsByArticle)
+  .get(getArticlesByTopic)
   .post(addArticleByTopic);
 
+apiRouter.route('/articles').get(getArticles);
 // apiRouter.route()
 
 // apiRouter.route('/:top_art_com_us/:type_id/:material_type').get(getGeneral);

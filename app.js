@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const apiRouter = require('./routes/api');
+// const mongoose = require('mongoose')
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -17,6 +18,7 @@ app.use('/*', (req, res, next) => {
 app.use((err, req, res, next) => {
   console.log(err);
   res.status(err.status || 500).send({ message: err.msg || 'Bad Request' });
+  // mongoose.disconnect()
 });
 
 module.exports = app;

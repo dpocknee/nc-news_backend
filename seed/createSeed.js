@@ -25,28 +25,29 @@ const topicsData = require(`./${currentEnv}Data/topics.json`);
 const usersData = require(`./${currentEnv}Data/users.json`);
 
 const createSeed = () => {
-  return mongoose
-    .connect(config.DB_URL)
-    .then(() => {
-      return mongoose.connection.dropDatabase();
-    })
+  return mongoose.connection
+    .dropDatabase()
     .then(() => {
       return Promise.all([seedDB(Topic, topicsData), seedDB(User, usersData)]);
     })
     .then(([seededTopics, seededUsers]) => {
-      const topicRefObj = buildRefObject(seededTopics, 'slug', 'slug');
-      const userRefObj = buildRefObject(seededUsers, 'username', '_id');
+      const userRefObject = buildRefObject(seededUsers, 'username', '_id');
       const formattedArticles = formatData(
         articlesData,
-        topicRefObj,
+        buildRefObject(seededTopics, 'slug', 'slug'),
         'topic',
-        userRefObj,
+        userRefObject,
         'created_by'
       );
-      return Promise.all([seedDB(Article, formattedArticles), userRefObj]);
+      return Promise.all([
+        seedDB(Article, formattedArticles),
+        userRefObject,
+        seededTopics,
+        seededUsers
+      ]);
     })
-    .then(([seededArticle, userRefObj]) => {
-      const articleRefObject = buildRefObject(seededArticle, 'title', '_id');
+    .then(([seededArticles, userRefObj, seededTopics, seededUsers]) => {
+      const articleRefObject = buildRefObject(seededArticles, 'title', '_id');
       const formattedComments = formatData(
         commentsData,
         articleRefObject,
@@ -54,11 +55,16 @@ const createSeed = () => {
         userRefObj,
         'created_by'
       );
-      return seedDB(Comment, formattedComments);
+      return Promise.all([
+        seededArticles,
+        seededTopics,
+        seededUsers,
+        seedDB(Comment, formattedComments)
+      ]);
     })
-    .then(() => {
+    .then(([seededArticles, seededTopics, seededUsers, seededComments]) => {
       console.log('Databases seeded');
-      mongoose.disconnect();
+      return { seededArticles, seededTopics, seededUsers, seededComments };
     })
     .catch({ status: 500, msg: 'Databases not seeded.' });
 };

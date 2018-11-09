@@ -7,15 +7,24 @@ const mongoose = require('mongoose');
 const config = require('../config');
 const { Topic, Article, Comment, User } = require('../models/');
 const { getArrayOfValidElements } = require('../utils');
+let allInfo;
 
 describe('/api', () => {
-  before(() => {});
   beforeEach(() => {
-    return createSeed();
+    return mongoose
+      .connect(config.DB_URL)
+      .then(() => {
+        return createSeed();
+      })
+      .then(seedInfo => {
+        allInfo = seedInfo;
+      })
+      .then(() => mongoose.disconnect());
   });
   after(() => {
-    return mongoose.disconnect();
+    // return mongoose.disconnect();
   });
+  // -----------------TOPICS ----------------------------
   it('GET return status 200 a html page of imformation', () => {
     return request
       .get('/api')
@@ -74,34 +83,25 @@ describe('/api', () => {
           });
       });
       it('POST status 201 adds a new article to a topic (checks content)', () => {
-        return mongoose
-          .connect(config.DB_URL)
-          .then(() => {
-            return getArrayOfValidElements(User, '_id');
+        const testArticle = {
+          title: 'new article',
+          body: 'This is my new article content',
+          created_by: String(allInfo.seededUsers[0]._id)
+        };
+        return request
+          .post('/api/topics/cats/articles')
+          .send(testArticle)
+          .expect(201)
+          .then(res => {
+            expect(res.body).to.include(testArticle);
           })
-          .then(id => {
-            const testArticle = {
-              title: 'new article',
-              body: 'This is my new article content',
-              created_by: id[0]
-            };
-            return request
-              .post('/api/topics/cats/articles')
-              .send(testArticle)
-              .expect(201)
-              .then(res => {
-                // console.log(res.body);
-                expect(res.body).to.include(testArticle);
-              });
-          })
-          .then(() => mongoose.disconnect())
           .catch(console.log);
       });
       it('POST status 404 returns message "x is not a valid topic"', () => {
         const testArticle = {
           title: 'new article',
           body: 'This is my new article content',
-          created_by: '5be429573f197521ab42196b'
+          created_by: mongoose.Types.ObjectId('5be429573f197521ab42196b')
         };
         return request
           .post('/api/topics/fearOfDeath/articles')
@@ -129,6 +129,29 @@ describe('/api', () => {
             );
           });
       });
+    });
+  });
+  describe('/articles', () => {
+    it('GET status 200 returns an array of all articles - checks number', () => {
+      return request
+        .get('/api/articles')
+        .expect(200)
+        .then(res => {
+          expect(res.body.length).to.equal(4);
+        });
+    });
+    it('GET status 200 returns an array of all topics - checks content', () => {
+      return request
+        .get('/api/articles')
+        .expect(200)
+        .then(res => {
+          expect(res.body[0].title).to.equal(
+            'Living in the shadow of a great man'
+          );
+          expect(res.body[0].body).to.equal(
+            'I find this existence challenging'
+          );
+        });
     });
   });
 });
