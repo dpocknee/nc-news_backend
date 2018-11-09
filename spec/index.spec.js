@@ -140,7 +140,7 @@ describe('/api', () => {
           expect(res.body.length).to.equal(4);
         });
     });
-    it('GET status 200 returns an array of all topics - checks content', () => {
+    it('GET status 200 returns an array of all articles - checks content', () => {
       return request
         .get('/api/articles')
         .expect(200)
@@ -151,6 +151,22 @@ describe('/api', () => {
           expect(res.body[0].body).to.equal(
             'I find this existence challenging'
           );
+        });
+    });
+    //--------------
+    it('GET status 200 returns an an article by ID - checks content', () => {
+      const articleId = allInfo.seededArticles[0]._id;
+      return request
+        .get(`/api/articles/${articleId}`)
+        .expect(200)
+        .then(res => {
+          expect(res.body[0].title).to.equal(
+            'Living in the shadow of a great man'
+          );
+          expect(res.body[0].body).to.equal(
+            'I find this existence challenging'
+          );
+          expect(res.body.length).to.equal(1);
         });
     });
   });

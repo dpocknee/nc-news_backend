@@ -5,7 +5,7 @@ const {
   getArticlesByTopic,
   addArticleByTopic
 } = require('../controllers/topics');
-const { getArticles } = require('../controllers/articles');
+const { getArticles, getArticlesById } = require('../controllers/articles');
 
 apiRouter.route('/').get(getDefault);
 apiRouter.route('/topics').get(getTopics);
@@ -15,6 +15,7 @@ apiRouter
   .post(addArticleByTopic);
 
 apiRouter.route('/articles').get(getArticles);
+apiRouter.route('/articles/:article_id').get(getArticlesById);
 // apiRouter.route()
 
 // apiRouter.route('/:top_art_com_us/:type_id/:material_type').get(getGeneral);

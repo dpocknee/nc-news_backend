@@ -45,7 +45,6 @@ const errorCreator = (validArray, toCompare, status, model, next) => {
 
 const commentCount = (comments, commentType, topic, slug, cats) => {
   // countAmount(modelToSearch, parameterToSearch, Topic, 'slug')
-  // topic
   return topic
     .find()
     .where(slug)

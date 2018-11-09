@@ -23,45 +23,52 @@ exports.getArticles = (req, res, next) => {
     .catch(next);
 };
 
-// exports.getArticlesById = (req, res, next) => {
-//   // topics/:topic_slug/articles
-//   return mongoose
-//     .connect(config.DB_URL)
-//     .then(() => {
-//       return getArrayOfValidElements(Topic, 'slug');
-//     })
-//     .then(validTopics => {
-//       errorCreator(validTopics, req.params.topic_slug, 404, 'topic', next);
-//       return Promise.all([
-//         Article.find()
-//           .where('belongs_to')
-//           .equals(req.params.topic_slug)
-//           .lean(),
-//         commentCount(
-//           Comment,
-//           'belongs_to',
-//           Topic,
-//           'slug',
-//           req.params.topic_slug
-//         )
-//       ]);
-//     })
-//     .then(([foundArticles, countValue]) => {
-//       const outputArticles = [];
-//       const foundArticles2 = [...foundArticles];
-//       foundArticles2.forEach(article => {
-//         article['comment_count'] = countValue;
-//         outputArticles.push(article);
-//       });
-//       if (foundArticles !== undefined) {
-//         return res.status(200).send(outputArticles);
-//       } else return foundArticles;
-//     })
-//     .then(() => {
-//       return mongoose.disconnect();
-//     })
-//     .catch(next);
-// };
+exports.getArticlesById = (req, res, next) => {
+  // articles/:article_id
+  const id = {
+    model: Article,
+    identifier: req.params.article_id,
+    parameter: '_id',
+    name: 'article',
+    comment_id: ''
+  };
+  return mongoose
+    .connect(config.DB_URL)
+    .then(() => {
+      return getArrayOfValidElements(id.model, id.parameter);
+    })
+    .then(validThings => {
+      errorCreator(validThings, id.identifier, 404, id.name, next);
+      return Promise.all([
+        Article.find()
+          .where(id.parameter)
+          .equals(id.identifier)
+          .lean(),
+        commentCount(
+          Comment,
+          'belongs_to',
+          id.model,
+          id.parameter,
+          id.identifier
+        )
+      ]);
+    })
+    .then(([foundArticles, countValue]) => {
+      const outputArticles = [];
+      const foundArticles2 = [...foundArticles];
+      foundArticles2.forEach(article => {
+        article['comment_count'] = countValue;
+        outputArticles.push(article);
+      });
+      if (foundArticles !== undefined) {
+        return res.status(200).send(outputArticles);
+      } else return foundArticles;
+    })
+    .then(() => {
+      return mongoose.disconnect();
+    })
+    .catch(next);
+};
 
 // exports.addArticleByTopic = (req, res, next) => {
 //   return mongoose
