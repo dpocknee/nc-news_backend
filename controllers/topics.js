@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 const config = require('../config');
-const { getArrayOfValidElements, errorCreator } = require('../utils');
+const {
+  getArrayOfValidElements,
+  errorCreator,
+  commentCount
+} = require('../utils');
 const { Topic, Article, Comment, User } = require('../models/');
 
 exports.getDefault = (req, res, next) => {
@@ -32,20 +36,29 @@ exports.getTopicsByArticle = (req, res, next) => {
     })
     .then(validTopics => {
       errorCreator(validTopics, req.params.topic_slug, 404, 'topic', next);
-      // if (!validTopics.includes(req.params.topic_slug)) {
-      //   return next({
-      //     status: 404,
-      //     msg: `${req.params.topic_slug} is not a valid topic!`
-      //   });
-      // } else {
-      return Article.find()
-        .where('belongs_to')
-        .equals(req.params.topic_slug);
-      // }
+      return Promise.all([
+        Article.find()
+          .where('belongs_to')
+          .equals(req.params.topic_slug)
+          .lean(),
+        commentCount(
+          Comment,
+          'belongs_to',
+          Topic,
+          'slug',
+          req.params.topic_slug
+        )
+      ]);
     })
-    .then(foundArticles => {
+    .then(([foundArticles, countValue]) => {
+      const outputArticles = [];
+      const foundArticles2 = [...foundArticles];
+      foundArticles2.forEach(article => {
+        article['comment_count'] = countValue;
+        outputArticles.push(article);
+      });
       if (foundArticles !== undefined) {
-        return res.status(200).send(foundArticles);
+        return res.status(200).send(outputArticles);
       } else return foundArticles;
     })
     .then(() => {
@@ -66,17 +79,6 @@ exports.addArticleByTopic = (req, res, next) => {
     .then(([validTopics, validUsers]) => {
       errorCreator(validTopics, req.params.topic_slug, 404, 'topic', next);
       errorCreator(validUsers, req.body.created_by, 404, 'user', next);
-      // if (!validTopics.includes(req.params.topic_slug)) {
-      //   return next({
-      //     status: 404,
-      //     msg: `${req.params.topic_slug} is not a valid topic!`
-      //   });
-      // } else if (!validUsers.includes(req.body.created_by)) {
-      //   return next({
-      //     status: 404,
-      //     msg: `${req.body.created_by} is not a valid user!`
-      //   });
-      // } else {
       const newArticle = new Article({
         title: req.body.title,
         body: req.body.body,
@@ -84,7 +86,6 @@ exports.addArticleByTopic = (req, res, next) => {
         created_by: req.body.created_by
       });
       return newArticle.save();
-      // }
     })
     .then(postedArticle => {
       return postedArticle.populate('created_by');

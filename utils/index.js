@@ -34,6 +34,24 @@ const getArrayOfValidElements = (model, typeOfInfo) => {
     .catch(console.log);
 };
 
+const commentCount = (comments, commentType, topic, slug, cats) => {
+  // countAmount(modelToSearch, parameterToSearch, Topic, 'slug')
+  // topic
+  return topic
+    .find()
+    .where(slug)
+    .equals(cats)
+    .then(() => {
+      return comments.find().populate('belongs_to');
+    })
+    .then(commentsArray => {
+      return commentsArray.reduce((accum, comment) => {
+        return comment.belongs_to.belongs_to === cats ? accum + 1 : accum;
+      }, 0);
+    })
+    .catch(console.log);
+};
+
 const errorCreator = (validArray, toCompare, status, model, next) => {
   if (!validArray.includes(toCompare)) {
     return next({
@@ -47,16 +65,6 @@ module.exports = {
   buildRefObject,
   formatData,
   getArrayOfValidElements,
-  errorCreator
-};
-
-const countAmount = model => {
-  return mongoose
-    .connect(config.DB_URL)
-    .then(() => {
-      return Article.find();
-    })
-    .then(originalDocs => {
-      return Promise.all([originalDocs, mongoose.disconnect()]);
-    });
+  errorCreator,
+  commentCount
 };
