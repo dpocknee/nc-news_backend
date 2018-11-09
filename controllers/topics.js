@@ -1,49 +1,47 @@
 const mongoose = require('mongoose');
 const config = require('../config');
+const { getArrayOfValidElements, errorCreator } = require('../utils');
 const { Topic, Article, Comment, User } = require('../models/');
 
 exports.getDefault = (req, res, next) => {
-  res.render('index');
+  return res.render('index');
 };
 
 exports.getTopics = (req, res, next) => {
   // All topics
-  mongoose
+  return mongoose
     .connect(config.DB_URL)
     .then(() => {
       return Topic.find();
     })
     .then(foundTopics => {
-      res.send(foundTopics);
+      return res.send(foundTopics);
     })
     .then(() => {
-      mongoose.disconnect();
+      return mongoose.disconnect();
     })
     .catch(next);
 };
 
 exports.getTopicsByArticle = (req, res, next) => {
   // topics/:topic_slug/articles
-  mongoose
+  return mongoose
     .connect(config.DB_URL)
     .then(() => {
-      return Topic.find();
+      return getArrayOfValidElements(Topic, 'slug');
     })
-    .then(topics => {
-      const possibleRoutes = topics.reduce((routesArray, topic) => {
-        routesArray.push(topic.slug);
-        return routesArray;
-      }, []);
-      if (!possibleRoutes.includes(req.params.topic_slug)) {
-        return next({
-          status: 404,
-          msg: `${req.params.topic_slug} is not a valid topic!`
-        });
-      } else {
-        return Article.find()
-          .where('belongs_to')
-          .equals(req.params.topic_slug);
-      }
+    .then(validTopics => {
+      errorCreator(validTopics, req.params.topic_slug, 404, 'topic', next);
+      // if (!validTopics.includes(req.params.topic_slug)) {
+      //   return next({
+      //     status: 404,
+      //     msg: `${req.params.topic_slug} is not a valid topic!`
+      //   });
+      // } else {
+      return Article.find()
+        .where('belongs_to')
+        .equals(req.params.topic_slug);
+      // }
     })
     .then(foundArticles => {
       if (foundArticles !== undefined) {
@@ -51,15 +49,34 @@ exports.getTopicsByArticle = (req, res, next) => {
       } else return foundArticles;
     })
     .then(() => {
-      mongoose.disconnect();
+      return mongoose.disconnect();
     })
     .catch(next);
 };
 
 exports.addArticleByTopic = (req, res, next) => {
-  mongoose
+  return mongoose
     .connect(config.DB_URL)
     .then(() => {
+      return Promise.all([
+        getArrayOfValidElements(Topic, 'slug'),
+        getArrayOfValidElements(User, '_id')
+      ]);
+    })
+    .then(([validTopics, validUsers]) => {
+      errorCreator(validTopics, req.params.topic_slug, 404, 'topic', next);
+      errorCreator(validUsers, req.body.created_by, 404, 'user', next);
+      // if (!validTopics.includes(req.params.topic_slug)) {
+      //   return next({
+      //     status: 404,
+      //     msg: `${req.params.topic_slug} is not a valid topic!`
+      //   });
+      // } else if (!validUsers.includes(req.body.created_by)) {
+      //   return next({
+      //     status: 404,
+      //     msg: `${req.body.created_by} is not a valid user!`
+      //   });
+      // } else {
       const newArticle = new Article({
         title: req.body.title,
         body: req.body.body,
@@ -67,17 +84,16 @@ exports.addArticleByTopic = (req, res, next) => {
         created_by: req.body.created_by
       });
       return newArticle.save();
+      // }
     })
     .then(postedArticle => {
-      console.log(postedArticle);
-      return Article.find(postedArticle).populate('created_by');
+      return postedArticle.populate('created_by');
     })
     .then(populatedArticle => {
-      console.log(populatedArticle);
-      res.status(201).send(populatedArticle);
+      return res.status(201).send(populatedArticle);
     })
     .then(() => {
-      mongoose.disconnect();
+      return mongoose.disconnect();
     })
     .catch(next);
 };

@@ -6,11 +6,15 @@ const createSeed = require('../seed/createSeed');
 const mongoose = require('mongoose');
 const config = require('../config');
 const { Topic, Article, Comment, User } = require('../models/');
+const { getArrayOfValidElements } = require('../utils');
 
 describe('/api', () => {
   before(() => {});
   beforeEach(() => {
     return createSeed();
+  });
+  after(() => {
+    return mongoose.disconnect();
   });
   it('GET return status 200 a html page of imformation', () => {
     return request
@@ -70,64 +74,61 @@ describe('/api', () => {
           });
       });
       it('POST status 201 adds a new article to a topic (checks content)', () => {
+        return mongoose
+          .connect(config.DB_URL)
+          .then(() => {
+            return getArrayOfValidElements(User, '_id');
+          })
+          .then(id => {
+            const testArticle = {
+              title: 'new article',
+              body: 'This is my new article content',
+              created_by: id[0]
+            };
+            return request
+              .post('/api/topics/cats/articles')
+              .send(testArticle)
+              .expect(201)
+              .then(res => {
+                // console.log(res.body);
+                expect(res.body).to.include(testArticle);
+              });
+          })
+          .then(() => mongoose.disconnect())
+          .catch(console.log);
+      });
+      it('POST status 404 returns message "x is not a valid topic"', () => {
         const testArticle = {
           title: 'new article',
           body: 'This is my new article content',
           created_by: '5be429573f197521ab42196b'
         };
         return request
-          .post('/api/topics/cats/articles')
+          .post('/api/topics/fearOfDeath/articles')
           .send(testArticle)
-          .expect(201)
+          .expect(404)
           .then(res => {
-            expect(res.body).to.include(testArticle);
+            expect(res.body.message).to.equal(
+              'fearOfDeath is not a valid topic!'
+            );
           });
       });
-      // it('POST status 404 adds a', () => {
-
-      // });
-      // xit('POST status 201 adds a new article to a topic (checks number)', () => {
-      //   return mongoose
-      //     .connect(config.DB_URL)
-      //     .then(() => {
-      //       return Article.find();
-      //     })
-      //     .then(originalDocs => {
-      //       return Promise.all([originalDocs, mongoose.disconnect()]);
-      //     })
-      //     .then(([originalDocs, placeholder]) => {
-      //       return Promise.all([
-      //         request.post('/api/topics/cats/articles').send({
-      //           title: 'new article',
-      //           body: 'This is my new article content',
-      //           created_by: '5be429573f197521ab42196b'
-      //         }),
-      //         originalDocs
-      //       ]);
-      //     })
-      //     .then(([res, originalDocs]) => {
-      //       return Promise.all([
-      //         res,
-      //         originalDocs,
-      //         mongoose.connect(config.DB_URL)
-      //       ]);
-      //     })
-      //     .then(([res, originalDocs, placeholder]) => {
-      //       return Promise.all([res, originalDocs, Article.find()]);
-      //     })
-      //     .then(([res, oldCount, newCount]) => {
-      //       return Promise.all([
-      //         res,
-      //         oldCount,
-      //         newCount,
-      //         mongoose.disconnect()
-      //       ]);
-      //     })
-      //     .then(([res, oldCount, newCount, placeholder]) => {
-      //       expect(newCount.length).to.equal(oldCount.length + 2);
-      //     })
-      //     .catch(console.log);
-      // });
+      it('POST status 404 returns message x is not a valid user', () => {
+        const testArticle = {
+          title: 'new article',
+          body: 'This is my new article content',
+          created_by: '5be429573f197771ab42196b'
+        };
+        return request
+          .post('/api/topics/cats/articles')
+          .send(testArticle)
+          .expect(404)
+          .then(res => {
+            expect(res.body.message).to.equal(
+              '5be429573f197771ab42196b is not a valid user!'
+            );
+          });
+      });
     });
   });
 });

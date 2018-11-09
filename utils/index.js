@@ -21,9 +21,33 @@ const formatData = (
   });
 };
 
+const getArrayOfValidElements = (model, typeOfInfo) => {
+  return model
+    .find()
+    .then(topics => {
+      const topicArray = topics.reduce((routesArray, topic) => {
+        routesArray.push(String(topic[typeOfInfo]));
+        return routesArray;
+      }, []);
+      return topicArray;
+    })
+    .catch(console.log);
+};
+
+const errorCreator = (validArray, toCompare, status, model, next) => {
+  if (!validArray.includes(toCompare)) {
+    return next({
+      status: status,
+      msg: `${toCompare} is not a valid ${model}!`
+    });
+  }
+};
+
 module.exports = {
   buildRefObject,
-  formatData
+  formatData,
+  getArrayOfValidElements,
+  errorCreator
 };
 
 const countAmount = model => {
