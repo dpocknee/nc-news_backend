@@ -29,8 +29,7 @@ exports.getArticlesById = (req, res, next) => {
     model: Article,
     identifier: req.params.article_id,
     parameter: '_id',
-    name: 'article',
-    comment_id: ''
+    name: 'article'
   };
   return mongoose
     .connect(config.DB_URL)
@@ -54,15 +53,36 @@ exports.getArticlesById = (req, res, next) => {
       ]);
     })
     .then(([foundArticles, countValue]) => {
-      const outputArticles = [];
-      const foundArticles2 = [...foundArticles];
-      foundArticles2.forEach(article => {
+      const outputArticles = foundArticles.map(article => {
         article['comment_count'] = countValue;
-        outputArticles.push(article);
+        return article;
       });
       if (foundArticles !== undefined) {
         return res.status(200).send(outputArticles);
       } else return foundArticles;
+    })
+    .then(() => {
+      return mongoose.disconnect();
+    })
+    .catch(next);
+};
+
+exports.getCommentsByArticle = (req, res, next) => {
+  //GET /api/articles/:article_id/comments
+  return mongoose
+    .connect(config.DB_URL)
+    .then(() => {
+      return getArrayOfValidElements(Article, '_id');
+    })
+    .then(validThings => {
+      errorCreator(validThings, req.params.article_id, 404, 'article', next);
+      return Comment.find()
+        .where('belongs_to')
+        .equals(req.params.article_id)
+        .lean();
+    })
+    .then(foundComments => {
+      return res.status(200).send(foundComments);
     })
     .then(() => {
       return mongoose.disconnect();

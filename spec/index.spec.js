@@ -131,7 +131,7 @@ describe('/api', () => {
       });
     });
   });
-  describe('/articles', () => {
+  describe.only('/articles', () => {
     it('GET status 200 returns an array of all articles - checks number', () => {
       return request
         .get('/api/articles')
@@ -167,6 +167,39 @@ describe('/api', () => {
             'I find this existence challenging'
           );
           expect(res.body.length).to.equal(1);
+        });
+    });
+    it('GET status 404 returns "article id x does not exist"', () => {
+      return request
+        .get(`/api/articles/5be429573f197771ab42196b`)
+        .expect(404)
+        .then(res => {
+          expect(res.body.message).to.equal(
+            '5be429573f197771ab42196b is not a valid article!'
+          );
+        });
+    });
+    //-----------
+    it('GET status 200 returns array of comments for article', () => {
+      const articleId = allInfo.seededArticles[0]._id;
+      return request
+        .get(`/api/articles/${articleId}/comments`)
+        .expect(200)
+        .then(res => {
+          expect(res.body[0].body).to.equal(
+            'Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — on you it works.'
+          );
+          expect(res.body.length).to.equal(2);
+        });
+    });
+    it('GET status 404 returns "article id x does not exist"', () => {
+      return request
+        .get(`/api/articles/5be429573f197771ab42196b/comments`)
+        .expect(404)
+        .then(res => {
+          expect(res.body.message).to.equal(
+            '5be429573f197771ab42196b is not a valid article!'
+          );
         });
     });
   });
