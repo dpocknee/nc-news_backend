@@ -8,7 +8,8 @@ const {
 const {
   getArticles,
   getArticlesById,
-  getCommentsByArticle
+  getCommentsByArticle,
+  addCommentsByArticle
 } = require('../controllers/articles');
 
 apiRouter.route('/').get(getDefault);
@@ -18,7 +19,10 @@ apiRouter
   .get(getArticlesByTopic)
   .post(addArticleByTopic);
 
-apiRouter.route('/articles/:article_id/comments').get(getCommentsByArticle);
+apiRouter
+  .route('/articles/:article_id/comments')
+  .get(getCommentsByArticle)
+  .post(addCommentsByArticle);
 apiRouter.route('/articles/:article_id').get(getArticlesById);
 apiRouter.route('/articles').get(getArticles);
 // apiRouter.route()

@@ -131,7 +131,7 @@ describe('/api', () => {
       });
     });
   });
-  describe.only('/articles', () => {
+  describe('/articles', () => {
     it('GET status 200 returns an array of all articles - checks number', () => {
       return request
         .get('/api/articles')
@@ -153,54 +153,133 @@ describe('/api', () => {
           );
         });
     });
-    //--------------
-    it('GET status 200 returns an an article by ID - checks content', () => {
-      const articleId = allInfo.seededArticles[0]._id;
-      return request
-        .get(`/api/articles/${articleId}`)
-        .expect(200)
-        .then(res => {
-          expect(res.body[0].title).to.equal(
-            'Living in the shadow of a great man'
-          );
-          expect(res.body[0].body).to.equal(
-            'I find this existence challenging'
-          );
-          expect(res.body.length).to.equal(1);
+
+    describe('/Larticle_id', () => {
+      it('GET status 200 returns an an article by ID - checks content', () => {
+        const articleId = allInfo.seededArticles[0]._id;
+        return request
+          .get(`/api/articles/${articleId}`)
+          .expect(200)
+          .then(res => {
+            expect(res.body[0].title).to.equal(
+              'Living in the shadow of a great man'
+            );
+            expect(res.body[0].body).to.equal(
+              'I find this existence challenging'
+            );
+            expect(res.body.length).to.equal(1);
+          });
+      });
+      it('GET status 404 returns "article id x does not exist"', () => {
+        return request
+          .get(`/api/articles/5be429573f197771ab42196b`)
+          .expect(404)
+          .then(res => {
+            expect(res.body.message).to.equal(
+              '5be429573f197771ab42196b is not a valid article!'
+            );
+          });
+      });
+      describe('/comments', () => {
+        it('GET status 200 returns array of comments for article', () => {
+          const articleId = allInfo.seededArticles[0]._id;
+          return request
+            .get(`/api/articles/${articleId}/comments`)
+            .expect(200)
+            .then(res => {
+              expect(res.body[0].body).to.equal(
+                'Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — on you it works.'
+              );
+              expect(res.body.length).to.equal(2);
+            });
         });
-    });
-    it('GET status 404 returns "article id x does not exist"', () => {
-      return request
-        .get(`/api/articles/5be429573f197771ab42196b`)
-        .expect(404)
-        .then(res => {
-          expect(res.body.message).to.equal(
-            '5be429573f197771ab42196b is not a valid article!'
-          );
+        it('GET status 404 returns "article id x does not exist"', () => {
+          return request
+            .get(`/api/articles/5be429573f197771ab42196b/comments`)
+            .expect(404)
+            .then(res => {
+              expect(res.body.message).to.equal(
+                '5be429573f197771ab42196b is not a valid article!'
+              );
+            });
         });
-    });
-    //-----------
-    it('GET status 200 returns array of comments for article', () => {
-      const articleId = allInfo.seededArticles[0]._id;
-      return request
-        .get(`/api/articles/${articleId}/comments`)
-        .expect(200)
-        .then(res => {
-          expect(res.body[0].body).to.equal(
-            'Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — on you it works.'
-          );
-          expect(res.body.length).to.equal(2);
+        it('POST return 201 adds a new comment to an article', () => {
+          const articleId = allInfo.seededArticles[0]._id;
+          const userId = allInfo.seededUsers[0]._id;
+          const testComment = {
+            body: 'This is my new comment',
+            created_by: userId
+          };
+          return request
+            .post(`/api/articles/${articleId}/comments`)
+            .send(testComment)
+            .expect(201)
+            .then(res => {
+              expect(res.body.body).to.equal(testComment.body);
+              expect(res.body.created_by).to.equal(
+                String(testComment.created_by)
+              );
+            });
         });
-    });
-    it('GET status 404 returns "article id x does not exist"', () => {
-      return request
-        .get(`/api/articles/5be429573f197771ab42196b/comments`)
-        .expect(404)
-        .then(res => {
-          expect(res.body.message).to.equal(
-            '5be429573f197771ab42196b is not a valid article!'
-          );
+        it('POST status 404 returns "article id x does not exist"', () => {
+          return request
+            .get(`/api/articles/5be429573f197771ab42196b/comments`)
+            .expect(404)
+            .then(res => {
+              expect(res.body.message).to.equal(
+                '5be429573f197771ab42196b is not a valid article!'
+              );
+            });
         });
+        it('POST status 400 return error about missing body ', () => {
+          const articleId = allInfo.seededArticles[0]._id;
+          const userId = allInfo.seededUsers[0]._id;
+          const testComment = {
+            created_by: userId
+          };
+          return request
+            .post(`/api/articles/${articleId}/comments`)
+            .send(testComment)
+            .expect(400)
+            .then(res => {
+              expect(res.body.message).to.equal(
+                'Request did not include a "body" value.'
+              );
+            });
+        });
+        it('POST status 400 return error about missing created_by ', () => {
+          const articleId = allInfo.seededArticles[0]._id;
+          const userId = allInfo.seededUsers[0]._id;
+          const testComment = {
+            body: 'This is my new comment'
+          };
+          return request
+            .post(`/api/articles/${articleId}/comments`)
+            .send(testComment)
+            .expect(400)
+            .then(res => {
+              expect(res.body.message).to.equal(
+                'undefined is not a valid user!'
+              );
+            });
+        });
+        it('POST status 400 return error about invalid User ID ', () => {
+          const articleId = allInfo.seededArticles[0]._id;
+          const testComment = {
+            body: 'This is my new comment',
+            created_by: '5be429573f197771ab42196b'
+          };
+          return request
+            .post(`/api/articles/${articleId}/comments`)
+            .send(testComment)
+            .expect(400)
+            .then(res => {
+              expect(res.body.message).to.equal(
+                '5be429573f197771ab42196b is not a valid user!'
+              );
+            });
+        });
+      });
     });
   });
 });

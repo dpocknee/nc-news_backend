@@ -90,34 +90,48 @@ exports.getCommentsByArticle = (req, res, next) => {
     .catch(next);
 };
 
-// exports.addArticleByTopic = (req, res, next) => {
-//   return mongoose
-//     .connect(config.DB_URL)
-//     .then(() => {
-//       return Promise.all([
-//         getArrayOfValidElements(Topic, 'slug'),
-//         getArrayOfValidElements(User, '_id')
-//       ]);
-//     })
-//     .then(([validTopics, validUsers]) => {
-//       errorCreator(validTopics, req.params.topic_slug, 404, 'topic', next);
-//       errorCreator(validUsers, req.body.created_by, 404, 'user', next);
-//       const newArticle = new Article({
-//         title: req.body.title,
-//         body: req.body.body,
-//         belongs_to: req.params.topic_slug,
-//         created_by: req.body.created_by
-//       });
-//       return newArticle.save();
-//     })
-//     .then(postedArticle => {
-//       return postedArticle.populate('created_by');
-//     })
-//     .then(populatedArticle => {
-//       return res.status(201).send(populatedArticle);
-//     })
-//     .then(() => {
-//       return mongoose.disconnect();
-//     })
-//     .catch(next);
-// };
+exports.addCommentsByArticle = (req, res, next) => {
+  return mongoose
+    .connect(config.DB_URL)
+    .then(() => {
+      return Promise.all([
+        getArrayOfValidElements(Article, '_id'),
+        getArrayOfValidElements(User, '_id')
+      ]);
+    })
+    .then(([validArticles, validUsers]) => {
+      // if (req.body === undefined)
+      //   return next({
+      //     status: 400,
+      //     msg: 'Request did not include a JSON body.'
+      //   });
+      errorCreator(validArticles, req.params.article_id, 400, 'article', next);
+      errorCreator(validUsers, req.body.created_by, 400, 'user', next);
+      if (req.body.body === undefined)
+        return next({
+          status: 400,
+          msg: 'Request did not include a "body" value.'
+        });
+      else if (req.body.created_by === undefined)
+        return next({
+          status: 400,
+          msg: 'Request did not include a "created_by" value.'
+        });
+      else return 'OK';
+    })
+    .then(chosenArticle => {
+      const newComment = new Comment({
+        body: req.body.body,
+        belongs_to: req.params.article_id,
+        created_by: req.body.created_by
+      });
+      return newComment.save();
+    })
+    .then(postedArticle => {
+      return res.status(201).send(postedArticle);
+    })
+    .then(() => {
+      return mongoose.disconnect();
+    })
+    .catch(next);
+};
