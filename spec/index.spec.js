@@ -1,7 +1,6 @@
 process.env.NODE_ENV = 'test';
 const v2 = require('../config');
 const DB_URL = process.env.DB_URL;
-// console.log('HERE???>>>', process.env, v2);
 const app = require('../app');
 const request = require('supertest')(app);
 const { expect } = require('chai');

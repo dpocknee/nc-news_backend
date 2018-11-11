@@ -11,6 +11,79 @@
   </head>
   <body>
     <h1>Information About This API</h1>
-    <p>Here is where some information about this api will go.</p>
+    <div class="api">
+      <h2>GET /api</h2>
+      <p>
+        Serves an HTML page with documentation for all the available endpoints
+      </p>
+    </div>
+    <div class="api">
+      <h2>GET /api/topics</h2>
+      <p>Get all the topics</p>
+    </div>
+    <div class="api">
+      <h2>GET /api/topics/:topic_slug/articles</h2>
+      <p>Return all the articles for a certain topic</p>
+      <p>e.g: /api/topics/football/articles</p>
+    </div>
+    <div class="api">
+      <h2>POST /api/topics/:topic_slug/articles</h2>
+      <p>
+        Add a new article to a topic. This route requires a JSON body with title
+        and body key value pairs
+      </p>
+      <p>
+        e.g: { "title": "new article", "body": "This is my new article content",
+        "created_by": "user_id goes here"}
+      </p>
+    </div>
+    <div class="api">
+      <h2>GET /api/articles</h2>
+      <p>Returns all the articles</p>
+    </div>
+    <div class="api">
+      <h2>GET /api/articles/:article_id</h2>
+      <p>Get an individual article</p>
+    </div>
+    <div class="api">
+      <h2>GET /api/articles/:article_id/comments</h2>
+      <p>Get all the comments for a individual article</p>
+    </div>
+    <div class="api">
+      <h2>POST /api/articles/:article_id/comments</h2>
+      <p>
+        Add a new comment to an article. This route requires a JSON body with
+        body and created_by key value pairs
+      </p>
+      <p>
+        e.g: `{"body": "This is my new comment", "created_by": "user_id goes
+        here"}
+      </p>
+    </div>
+    <div class="api">
+      <h2>PATCH /api/articles/:article_id</h2>
+      <p>
+        Increment or Decrement the votes of an article by one. This route
+        requires a vote query of 'up' or 'down'
+      </p>
+      <p>e.g: /api/articles/:article_id?vote=up</p>
+    </div>
+    <div class="api">
+      <h2>PATCH /api/comments/:comment_id</h2>
+      <p>
+        Increment or Decrement the votes of a comment by one. This route
+        requires a vote query of 'up' or 'down'
+      </p>
+      <p>e.g: /api/comments/:comment_id?vote=down</p>
+    </div>
+    <div class="api">
+      <h2>DELETE /api/comments/:comment_id</h2>
+      <p>Deletes a comment</p>
+    </div>
+    <div class="api">
+      <h2>GET /api/users/:username</h2>
+      <p>e.g: /api/users/mitch123</p>
+      <p>Returns a JSON object with the profile data for the specified user.</p>
+    </div>
   </body>
 </html>

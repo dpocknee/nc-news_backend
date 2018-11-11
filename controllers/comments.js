@@ -5,7 +5,7 @@ const {
   errorCreator,
   commentCount
 } = require('../utils');
-const { Topic, Article, Comment, User } = require('../models/');
+const { Topic, Article, Comment, User } = require('../models');
 
 exports.changeCommentVotes = (req, res, next) => {
   const id = {
