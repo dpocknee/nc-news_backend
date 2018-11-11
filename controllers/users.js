@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const config = require('../config');
+const DB_URL = process.env.DB_URL;
 const {
   getArrayOfValidElements,
   errorCreator,
@@ -18,7 +18,7 @@ exports.getUserByUsername = (req, res, next) => {
     name: 'user'
   };
   return mongoose
-    .connect(config.DB_URL)
+    .connect(DB_URL)
     .then(() => {
       return getArrayOfValidElements(id.model, id.parameter);
     })

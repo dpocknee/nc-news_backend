@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const config = require('../config');
+const DB_URL = process.env.DB_URL;
 const {
   getArrayOfValidElements,
   errorCreator,
@@ -14,7 +14,7 @@ exports.getDefault = (req, res, next) => {
 exports.getTopics = (req, res, next) => {
   // All topics
   return mongoose
-    .connect(config.DB_URL)
+    .connect(DB_URL)
     .then(() => {
       return Topic.find();
     })
@@ -30,7 +30,7 @@ exports.getTopics = (req, res, next) => {
 exports.getArticlesByTopic = (req, res, next) => {
   // topics/:topic_slug/articles
   return mongoose
-    .connect(config.DB_URL)
+    .connect(DB_URL)
     .then(() => {
       return getArrayOfValidElements(Topic, 'slug');
     })
@@ -69,7 +69,7 @@ exports.getArticlesByTopic = (req, res, next) => {
 
 exports.addArticleByTopic = (req, res, next) => {
   return mongoose
-    .connect(config.DB_URL)
+    .connect(DB_URL)
     .then(() => {
       return Promise.all([
         getArrayOfValidElements(Topic, 'slug'),

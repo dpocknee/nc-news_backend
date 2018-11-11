@@ -1,18 +1,18 @@
 process.env.NODE_ENV = 'test';
+const v2 = require('../config');
+const DB_URL = process.env.DB_URL;
+// console.log('HERE???>>>', process.env, v2);
 const app = require('../app');
 const request = require('supertest')(app);
 const { expect } = require('chai');
 const createSeed = require('../seed/createSeed');
 const mongoose = require('mongoose');
-const config = require('../config');
-const { Topic, Article, Comment, User } = require('../models/');
-const { getArrayOfValidElements } = require('../utils');
 let allInfo;
 
 describe('/api', () => {
   beforeEach(() => {
     return mongoose
-      .connect(config.DB_URL)
+      .connect(DB_URL)
       .then(() => {
         return createSeed();
       })

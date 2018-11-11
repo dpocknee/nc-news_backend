@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const config = require('../config');
+const DB_URL = process.env.DB_URL;
 const {
   getArrayOfValidElements,
   errorCreator,
@@ -10,7 +10,7 @@ const { Topic, Article, Comment, User } = require('../models/');
 exports.getArticles = (req, res, next) => {
   // All topics
   return mongoose
-    .connect(config.DB_URL)
+    .connect(DB_URL)
     .then(() => {
       return Article.find();
     })
@@ -32,7 +32,7 @@ exports.getArticlesById = (req, res, next) => {
     name: 'article'
   };
   return mongoose
-    .connect(config.DB_URL)
+    .connect(DB_URL)
     .then(() => {
       return getArrayOfValidElements(id.model, id.parameter);
     })
@@ -70,7 +70,7 @@ exports.getArticlesById = (req, res, next) => {
 exports.getCommentsByArticle = (req, res, next) => {
   //GET /api/articles/:article_id/comments
   return mongoose
-    .connect(config.DB_URL)
+    .connect(DB_URL)
     .then(() => {
       return getArrayOfValidElements(Article, '_id');
     })
@@ -92,7 +92,7 @@ exports.getCommentsByArticle = (req, res, next) => {
 
 exports.addCommentsByArticle = (req, res, next) => {
   return mongoose
-    .connect(config.DB_URL)
+    .connect(DB_URL)
     .then(() => {
       return Promise.all([
         getArrayOfValidElements(Article, '_id'),
@@ -136,7 +136,7 @@ exports.changeVotes = (req, res, next) => {
     name: 'article'
   };
   return mongoose
-    .connect(config.DB_URL)
+    .connect(DB_URL)
     .then(() => {
       return getArrayOfValidElements(id.model, id.parameter);
     })

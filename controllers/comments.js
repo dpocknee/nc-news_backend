@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const config = require('../config');
+const DB_URL = process.env.DB_URL;
 const {
   getArrayOfValidElements,
   errorCreator,
@@ -15,7 +15,7 @@ exports.changeCommentVotes = (req, res, next) => {
     name: 'comment'
   };
   return mongoose
-    .connect(config.DB_URL)
+    .connect(DB_URL)
     .then(() => {
       return getArrayOfValidElements(id.model, id.parameter);
     })
@@ -64,7 +64,7 @@ exports.deleteComment = (req, res, next) => {
     name: 'comment'
   };
   return mongoose
-    .connect(config.DB_URL)
+    .connect(DB_URL)
     .then(() => {
       return getArrayOfValidElements(id.model, id.parameter);
     })
