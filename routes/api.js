@@ -45,14 +45,3 @@ apiRouter
 apiRouter.route('/users/:username').get(getUserByUsername);
 
 module.exports = apiRouter;
-
-// GET
-// topics
-// articles
-// comments
-
-// topics/topic_slug/articles
-// articles/article_id
-// articles/article_id/comments
-// comments/comment_id
-// users/username
