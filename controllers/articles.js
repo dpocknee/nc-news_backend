@@ -149,26 +149,22 @@ exports.changeVotes = (req, res, next) => {
     .then(validThings => {
       errorCreator(validThings, id.identifier, 404, id.name, next);
       const queryKeys = Object.keys(req.query);
-      console.log('NO?', queryKeys.length, req.query);
       if (queryKeys.length > 0 && !queryKeys.includes('vote')) {
         return next({ status: 400, msg: 'Not a valid query.' });
       }
       if (req.query.vote !== 'up' && req.query.vote !== 'down')
         return next({ status: 400, msg: 'Not a valid query key.' });
-      return commentCount(
-        Comment,
-        'belongs_to',
-        id.model,
-        id.parameter,
-        id.identifier
-      );
-    })
-    .then(countValue => {
       return Promise.all([
         Article.find()
           .where('_id')
           .equals(req.params.article_id),
-        countValue
+        commentCount(
+          Comment,
+          'belongs_to',
+          id.model,
+          id.parameter,
+          id.identifier
+        )
       ]);
     })
     .then(([foundArticle, countValue]) => {
@@ -182,7 +178,7 @@ exports.changeVotes = (req, res, next) => {
         { new: true },
         (err, func) => {
           if (err) next(err);
-          return func;
+          return { ...func, comment_count: countValue };
         }
       );
     })

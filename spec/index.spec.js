@@ -283,7 +283,7 @@ describe('/api', () => {
       });
     });
   });
-  describe.only('more articles/:article_id', () => {
+  describe('more articles/:article_id', () => {
     it('PATCH status 201 returns updated votes (increase)', () => {
       const articleId = allInfo.seededArticles[0]._id;
       return request
@@ -293,7 +293,7 @@ describe('/api', () => {
           expect(res.body).to.include({ votes: 1 });
         });
     });
-    it('PATCH status 201 returns updated votes (increase)', () => {
+    it('PATCH status 201 returns updated votes (decrease)', () => {
       const articleId = allInfo.seededArticles[0]._id;
       return request
         .patch(`/api/articles/${articleId}?vote=down`)
@@ -328,6 +328,26 @@ describe('/api', () => {
         .expect(400)
         .then(res => {
           expect(res.body.message).to.equal('Not a valid query key.');
+        });
+    });
+  });
+  describe.only('/comments', () => {
+    it('PATCH status 201 return updated comment votes (increase).', () => {
+      const commentId = allInfo.seededComments[0]._id;
+      return request
+        .patch(`/api/comments/${commentId}?vote=up`)
+        .expect(201)
+        .then(res => {
+          expect(res.body).to.include({ votes: 8 });
+        });
+    });
+    it('PATCH status 201 return updated comment votes (decrease).', () => {
+      const commentId = allInfo.seededComments[0]._id;
+      return request
+        .patch(`/api/comments/${commentId}?vote=down`)
+        .expect(201)
+        .then(res => {
+          expect(res.body).to.include({ votes: 6 });
         });
     });
   });

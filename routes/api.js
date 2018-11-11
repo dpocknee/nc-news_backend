@@ -13,6 +13,8 @@ const {
   changeVotes
 } = require('../controllers/articles');
 
+const { changeCommentVotes } = require('../controllers/comments');
+
 apiRouter.route('/').get(getDefault);
 apiRouter.route('/topics').get(getTopics);
 apiRouter
@@ -29,6 +31,12 @@ apiRouter
   .get(getArticlesById)
   .patch(changeVotes);
 apiRouter.route('/articles').get(getArticles);
+
+apiRouter.route('/comments/:comment_id').patch(changeCommentVotes);
+
+// PATCH /api/comments/:comment_id
+// # Increment or Decrement the votes of a comment by one. This route requires a vote query of 'up' or 'down'
+// # e.g: `/api/comments/:comment_id?vote=down`
 // apiRouter.route()
 
 // apiRouter.route('/:top_art_com_us/:type_id/:material_type').get(getGeneral);
