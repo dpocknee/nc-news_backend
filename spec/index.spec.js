@@ -350,5 +350,33 @@ describe('/api', () => {
           expect(res.body).to.include({ votes: 6 });
         });
     });
+    it('PATCH status 404 returns "comment id x does not exist"', () => {
+      return request
+        .patch(`/api/comments/5be429573f197771ab42196b?vote=up`)
+        .expect(404)
+        .then(res => {
+          expect(res.body.message).to.equal(
+            '5be429573f197771ab42196b is not a valid comment!'
+          );
+        });
+    });
+    it('PATCH status 400 return "errors for invalid queries"', () => {
+      const commentId = allInfo.seededComments[0]._id;
+      return request
+        .patch(`/api/comments/${commentId}?baloon=down`)
+        .expect(400)
+        .then(res => {
+          expect(res.body.message).to.equal('Not a valid query.');
+        });
+    });
+    it('PATCH status 400 return "errors for invalid queries"', () => {
+      const commentId = allInfo.seededComments[0]._id;
+      return request
+        .patch(`/api/comments/${commentId}?vote=balloon`)
+        .expect(400)
+        .then(res => {
+          expect(res.body.message).to.equal('Not a valid query key.');
+        });
+    });
   });
 });
