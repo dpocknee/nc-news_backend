@@ -100,26 +100,24 @@ exports.addCommentsByArticle = (req, res, next) => {
       ]);
     })
     .then(([validArticles, validUsers]) => {
-      // if (req.body === undefined)
-      //   return next({
-      //     status: 400,
-      //     msg: 'Request did not include a JSON body.'
-      //   });
       errorCreator(validArticles, req.params.article_id, 400, 'article', next);
+      // if (req.body === undefined)
+      //   console.log('WORKING', req.body, req.body === undefined);
+      // return next({
+      //   status: 400,
+      //   msg: 'Request did not include a JSON body.'
+      // });
       errorCreator(validUsers, req.body.created_by, 400, 'user', next);
       if (req.body.body === undefined)
         return next({
           status: 400,
           msg: 'Request did not include a "body" value.'
         });
-      else if (req.body.created_by === undefined)
+      if (req.body.created_by === undefined)
         return next({
           status: 400,
           msg: 'Request did not include a "created_by" value.'
         });
-      else return 'OK';
-    })
-    .then(chosenArticle => {
       const newComment = new Comment({
         body: req.body.body,
         belongs_to: req.params.article_id,
@@ -129,6 +127,67 @@ exports.addCommentsByArticle = (req, res, next) => {
     })
     .then(postedArticle => {
       return res.status(201).send(postedArticle);
+    })
+    .then(() => {
+      return mongoose.disconnect();
+    })
+    .catch(next);
+};
+
+exports.changeVotes = (req, res, next) => {
+  const id = {
+    model: Article,
+    identifier: req.params.article_id,
+    parameter: '_id',
+    name: 'article'
+  };
+  return mongoose
+    .connect(config.DB_URL)
+    .then(() => {
+      return getArrayOfValidElements(id.model, id.parameter);
+    })
+    .then(validThings => {
+      errorCreator(validThings, id.identifier, 404, id.name, next);
+      const queryKeys = Object.keys(req.query);
+      console.log('NO?', queryKeys.length, req.query);
+      if (queryKeys.length > 0 && !queryKeys.includes('vote')) {
+        return next({ status: 400, msg: 'Not a valid query.' });
+      }
+      if (req.query.vote !== 'up' && req.query.vote !== 'down')
+        return next({ status: 400, msg: 'Not a valid query key.' });
+      return commentCount(
+        Comment,
+        'belongs_to',
+        id.model,
+        id.parameter,
+        id.identifier
+      );
+    })
+    .then(countValue => {
+      return Promise.all([
+        Article.find()
+          .where('_id')
+          .equals(req.params.article_id),
+        countValue
+      ]);
+    })
+    .then(([foundArticle, countValue]) => {
+      const newVotes =
+        req.query.vote === 'up'
+          ? foundArticle[0].votes + 1
+          : foundArticle[0].votes - 1;
+      return Article.findByIdAndUpdate(
+        req.params.article_id,
+        { votes: newVotes },
+        { new: true },
+        (err, func) => {
+          if (err) next(err);
+          return func;
+        }
+      );
+    })
+    .then(updatedArticles => {
+      return res.status(201).send(updatedArticles);
     })
     .then(() => {
       return mongoose.disconnect();

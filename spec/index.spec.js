@@ -154,7 +154,7 @@ describe('/api', () => {
         });
     });
 
-    describe('/Larticle_id', () => {
+    describe('/:article_id', () => {
       it('GET status 200 returns an an article by ID - checks content', () => {
         const articleId = allInfo.seededArticles[0]._id;
         return request
@@ -231,6 +231,7 @@ describe('/api', () => {
               );
             });
         });
+
         it('POST status 400 return error about missing body ', () => {
           const articleId = allInfo.seededArticles[0]._id;
           const userId = allInfo.seededUsers[0]._id;
@@ -280,6 +281,54 @@ describe('/api', () => {
             });
         });
       });
+    });
+  });
+  describe.only('more articles/:article_id', () => {
+    it('PATCH status 201 returns updated votes (increase)', () => {
+      const articleId = allInfo.seededArticles[0]._id;
+      return request
+        .patch(`/api/articles/${articleId}?vote=up`)
+        .expect(201)
+        .then(res => {
+          expect(res.body).to.include({ votes: 1 });
+        });
+    });
+    it('PATCH status 201 returns updated votes (increase)', () => {
+      const articleId = allInfo.seededArticles[0]._id;
+      return request
+        .patch(`/api/articles/${articleId}?vote=down`)
+        .expect(201)
+        .then(res => {
+          expect(res.body).to.include({ votes: -1 });
+        });
+    });
+    it('PATCH status 404 returns "article id x does not exist"', () => {
+      return request
+        .patch(`/api/articles/5be429573f197771ab42196b?vote=up`)
+        .expect(404)
+        .then(res => {
+          expect(res.body.message).to.equal(
+            '5be429573f197771ab42196b is not a valid article!'
+          );
+        });
+    });
+    it('PATCH status 400 return "errors for invalid queries"', () => {
+      const articleId = allInfo.seededArticles[0]._id;
+      return request
+        .patch(`/api/articles/${articleId}?baloon=down`)
+        .expect(400)
+        .then(res => {
+          expect(res.body.message).to.equal('Not a valid query.');
+        });
+    });
+    it('PATCH status 400 return "errors for invalid queries"', () => {
+      const articleId = allInfo.seededArticles[0]._id;
+      return request
+        .patch(`/api/articles/${articleId}?vote=balloon`)
+        .expect(400)
+        .then(res => {
+          expect(res.body.message).to.equal('Not a valid query key.');
+        });
     });
   });
 });
