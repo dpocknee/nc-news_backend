@@ -101,12 +101,6 @@ exports.addCommentsByArticle = (req, res, next) => {
     })
     .then(([validArticles, validUsers]) => {
       errorCreator(validArticles, req.params.article_id, 400, 'article', next);
-      // if (req.body === undefined)
-      //   console.log('WORKING', req.body, req.body === undefined);
-      // return next({
-      //   status: 400,
-      //   msg: 'Request did not include a JSON body.'
-      // });
       errorCreator(validUsers, req.body.created_by, 400, 'user', next);
       if (req.body.body === undefined)
         return next({

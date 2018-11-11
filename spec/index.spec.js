@@ -331,7 +331,7 @@ describe('/api', () => {
         });
     });
   });
-  describe.only('/comments', () => {
+  describe('/comments', () => {
     it('PATCH status 201 return updated comment votes (increase).', () => {
       const commentId = allInfo.seededComments[0]._id;
       return request
@@ -387,6 +387,41 @@ describe('/api', () => {
           expect(res.body).to.include({
             _id: String(commentId)
           });
+        });
+    });
+    it('DELETE status 404 returns "comment id x does not exist"', () => {
+      return request
+        .delete(`/api/comments/5be429573f197771ab42196b`)
+        .expect(404)
+        .then(res => {
+          expect(res.body.message).to.equal(
+            '5be429573f197771ab42196b is not a valid comment!'
+          );
+        });
+    });
+  });
+  describe('/users/username', () => {
+    it('GET status 200 return user by username', () => {
+      const userId = allInfo.seededUsers[0].username;
+      console.log('username', userId);
+      return request
+        .get(`/api/users/${userId}`)
+        .expect(200)
+        .then(res => {
+          expect(res.body).to.include({
+            username: userId,
+            name: 'jonny'
+          });
+        });
+    });
+    it('GET status 404 return user x does not exist ', () => {
+      return request
+        .get(`/api/users/5be429573f197771ab42196b`)
+        .expect(404)
+        .then(res => {
+          expect(res.body.message).to.equal(
+            '5be429573f197771ab42196b is not a valid user!'
+          );
         });
     });
   });
