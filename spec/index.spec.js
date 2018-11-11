@@ -378,5 +378,16 @@ describe('/api', () => {
           expect(res.body.message).to.equal('Not a valid query key.');
         });
     });
+    it('DELETE status 202 returns deleted comment', () => {
+      const commentId = allInfo.seededComments[0]._id;
+      return request
+        .delete(`/api/comments/${commentId}`)
+        .expect(202)
+        .then(res => {
+          expect(res.body).to.include({
+            _id: String(commentId)
+          });
+        });
+    });
   });
 });

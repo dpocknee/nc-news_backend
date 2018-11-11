@@ -55,3 +55,28 @@ exports.changeCommentVotes = (req, res, next) => {
     })
     .catch(next);
 };
+
+exports.deleteComment = (req, res, next) => {
+  const id = {
+    model: Comment,
+    identifier: req.params.comment_id,
+    parameter: '_id',
+    name: 'comment'
+  };
+  return mongoose
+    .connect(config.DB_URL)
+    .then(() => {
+      return getArrayOfValidElements(id.model, id.parameter);
+    })
+    .then(validThings => {
+      errorCreator(validThings, id.identifier, 404, id.name, next);
+      return Comment.findByIdAndRemove(id.identifier);
+    })
+    .then(removedComment => {
+      return res.status(202).send(removedComment);
+    })
+    .then(() => {
+      return mongoose.disconnect();
+    })
+    .catch(next);
+};
