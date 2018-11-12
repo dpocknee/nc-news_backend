@@ -11,17 +11,12 @@ const DB_URL = process.env.DB_URL;
 
 describe('/api', () => {
   beforeEach(() => {
-    return mongoose
-      .connect(DB_URL)
-      .then(() => {
-        return createSeed();
-      })
-      .then(seedInfo => {
-        allInfo = seedInfo;
-        return seedInfo;
-      });
+    return createSeed().then(seedInfo => {
+      allInfo = seedInfo;
+      return seedInfo;
+    });
   });
-  // after(() => mongoose.disconnect());
+  after(() => mongoose.disconnect());
 
   describe('/api', () => {
     it('GET return status 200 a html page of imformation', () => {
