@@ -1,6 +1,6 @@
 # Northcoders News
 
-This is an API to serve Northcoders-related news from a Mongo database. A working version can be found at: https://frozen-river-28585.herokuapp.com/api.
+This is an API to serve Northcoders-related news from a Mongo database. A working version can be found at: [https://frozen-river-28585.herokuapp.com/api](https://frozen-river-28585.herokuapp.com/api).
 
 ## Getting Started
 
@@ -14,26 +14,10 @@ const config = {
   },
   test: {
     DB_URL: 'mongodb://localhost:27017/test_nc_news'
-  },
-  production: {
-    DB_URL: 'mongodb://northcoders:northcoders1@ds024748.mlab.com:24748/nc_news'
   }
 };
 
-if (!process.env.NODE_ENV) {
-  if (process.env.npm_lifecycle_event.split(':')[0] === 'seed') {
-    process.env.DB_URL =
-      config[process.env.npm_lifecycle_event.split(':')[1]].DB_URL;
-  } else {
-    process.env.DB_URL = config.dev;
-  }
-} else {
-  process.env.DB_URL = config[process.env.NODE_ENV].DB_URL;
-}
-const output = process.env.DB_URL;
-
-module.exports = output;
-
+module.exports = config;
 ```
 
 3. Run `npm install` to install any dependencies.

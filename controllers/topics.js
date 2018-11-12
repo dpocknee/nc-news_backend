@@ -1,5 +1,3 @@
-const mongoose = require('mongoose');
-const DB_URL = process.env.DB_URL;
 const {
   getArrayOfValidElements,
   errorCreator,
@@ -13,29 +11,27 @@ exports.getDefault = (req, res, next) => {
 
 exports.getTopics = (req, res, next) => {
   // All topics
-  return mongoose
-    .connect(DB_URL)
-    .then(() => {
-      return Topic.find();
-    })
+  return Topic.find()
     .then(foundTopics => {
       return res.send(foundTopics);
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(next);
 };
 
 exports.getArticlesByTopic = (req, res, next) => {
   // topics/:topic_slug/articles
-  return mongoose
-    .connect(DB_URL)
-    .then(() => {
-      return getArrayOfValidElements(Topic, 'slug');
-    })
+  return getArrayOfValidElements(Topic, 'slug')
     .then(validTopics => {
-      errorCreator(validTopics, req.params.topic_slug, 404, 'topic', next);
+      const isThereAnError = errorCreator(
+        validTopics,
+        req.params.topic_slug,
+        404,
+        'topic',
+        next
+      );
+      return isThereAnError ? Promise.reject(isThereAnError) : 0;
+    })
+    .then(() => {
       return Promise.all([
         Article.find()
           .where('belongs_to')
@@ -51,34 +47,39 @@ exports.getArticlesByTopic = (req, res, next) => {
       ]);
     })
     .then(([foundArticles, countValue]) => {
-      const outputArticles = [];
-      const foundArticles2 = [...foundArticles];
-      foundArticles2.forEach(article => {
+      const foundArticles2 = [...foundArticles].map(article => {
         article['comment_count'] = countValue;
-        outputArticles.push(article);
+        return article;
       });
-      if (foundArticles !== undefined) {
-        return res.status(200).send(outputArticles);
+      if (foundArticles2 !== undefined) {
+        return res.status(200).send(foundArticles2);
       } else return foundArticles;
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(next);
 };
 
 exports.addArticleByTopic = (req, res, next) => {
-  return mongoose
-    .connect(DB_URL)
-    .then(() => {
-      return Promise.all([
-        getArrayOfValidElements(Topic, 'slug'),
-        getArrayOfValidElements(User, '_id')
-      ]);
-    })
+  return Promise.all([
+    getArrayOfValidElements(Topic, 'slug'),
+    getArrayOfValidElements(User, '_id')
+  ])
     .then(([validTopics, validUsers]) => {
-      errorCreator(validTopics, req.params.topic_slug, 404, 'topic', next);
-      errorCreator(validUsers, req.body.created_by, 404, 'user', next);
+      const error1 = errorCreator(
+        validTopics,
+        req.params.topic_slug,
+        404,
+        'topic',
+        next
+      );
+      const error2 = errorCreator(
+        validUsers,
+        req.body.created_by,
+        404,
+        'user',
+        next
+      );
+      if (error1) return Promise.reject(error1);
+      if (error2) return Promise.reject(error2);
       const newArticle = new Article({
         title: req.body.title,
         body: req.body.body,
@@ -92,9 +93,6 @@ exports.addArticleByTopic = (req, res, next) => {
     })
     .then(populatedArticle => {
       return res.status(201).send(populatedArticle);
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(next);
 };

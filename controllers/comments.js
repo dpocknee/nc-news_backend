@@ -1,5 +1,3 @@
-const mongoose = require('mongoose');
-const DB_URL = process.env.DB_URL;
 const {
   getArrayOfValidElements,
   errorCreator,
@@ -14,21 +12,24 @@ exports.changeCommentVotes = (req, res, next) => {
     parameter: '_id',
     name: 'comment'
   };
-  return mongoose
-    .connect(DB_URL)
-    .then(() => {
-      return getArrayOfValidElements(id.model, id.parameter);
-    })
+  return getArrayOfValidElements(id.model, id.parameter)
     .then(validThings => {
-      errorCreator(validThings, id.identifier, 404, id.name, next);
+      const errorChecker = errorCreator(
+        validThings,
+        id.identifier,
+        404,
+        id.name,
+        next
+      );
+      if (errorChecker) return Promise.reject(errorChecker);
       const queryKeys = Object.keys(req.query);
       if (queryKeys.length > 0 && !queryKeys.includes('vote')) {
-        return next({ status: 400, msg: 'Not a valid query.' });
+        return Promise.reject({ status: 400, msg: 'Not a valid query.' });
       }
       if (req.query.vote !== 'up' && req.query.vote !== 'down')
-        return next({ status: 400, msg: 'Not a valid query key.' });
+        return Promise.reject({ status: 400, msg: 'Not a valid query key.' });
       return Comment.findById(id.identifier, (err, comment) => {
-        if (err) console.log(err);
+        // if (err) console.log(err);
         return comment;
       });
     })
@@ -50,9 +51,6 @@ exports.changeCommentVotes = (req, res, next) => {
     .then(updatedArticles => {
       return res.status(201).send(updatedArticles);
     })
-    .then(() => {
-      return mongoose.disconnect();
-    })
     .catch(next);
 };
 
@@ -63,20 +61,20 @@ exports.deleteComment = (req, res, next) => {
     parameter: '_id',
     name: 'comment'
   };
-  return mongoose
-    .connect(DB_URL)
-    .then(() => {
-      return getArrayOfValidElements(id.model, id.parameter);
-    })
+  return getArrayOfValidElements(id.model, id.parameter)
     .then(validThings => {
-      errorCreator(validThings, id.identifier, 404, id.name, next);
-      return Comment.findByIdAndRemove(id.identifier);
+      const errorChecker = errorCreator(
+        validThings,
+        id.identifier,
+        404,
+        id.name,
+        next
+      );
+      if (errorChecker) return Promise.reject(errorChecker);
+      else return Comment.findByIdAndRemove(id.identifier);
     })
     .then(removedComment => {
       return res.status(202).send(removedComment);
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(next);
 };

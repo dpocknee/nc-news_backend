@@ -1,10 +1,4 @@
-const mongoose = require('mongoose');
-const DB_URL = process.env.DB_URL;
-const {
-  getArrayOfValidElements,
-  errorCreator,
-  commentCount
-} = require('../utils');
+const { getArrayOfValidElements, errorCreator } = require('../utils');
 const { Topic, Article, Comment, User } = require('../models/');
 
 exports.getUserByUsername = (req, res, next) => {
@@ -17,23 +11,24 @@ exports.getUserByUsername = (req, res, next) => {
     parameter: 'username',
     name: 'user'
   };
-  return mongoose
-    .connect(DB_URL)
-    .then(() => {
-      return getArrayOfValidElements(id.model, id.parameter);
-    })
+  return getArrayOfValidElements(id.model, id.parameter)
     .then(validThings => {
-      errorCreator(validThings, id.identifier, 404, id.name, next);
-      return User.findOne()
-        .where(id.parameter)
-        .equals(id.identifier)
-        .lean();
+      const errorChecker = errorCreator(
+        validThings,
+        id.identifier,
+        404,
+        id.name,
+        next
+      );
+      if (errorChecker) return Promise.reject(errorChecker);
+      else
+        return User.findOne()
+          .where(id.parameter)
+          .equals(id.identifier)
+          .lean();
     })
     .then(foundUser => {
       return res.status(200).send(foundUser);
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(next);
 };

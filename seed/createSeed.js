@@ -11,8 +11,23 @@ const seedDB = require('./seed');
 const mongoose = require('mongoose');
 const { User, Article, Comment, Topic } = require('../models');
 const { buildRefObject, formatData } = require('../utils');
-const currentEnv = process.env.NODE_ENV;
+const config = require('../config');
 
+// Is this a 'npm run seed:dev' or 'npm run seed:test' command?
+// If so, set the DB_URL and NODE_ENV values to dev or test:
+if (!process.env.NODE_ENV) {
+  const terminalCommand = process.env.npm_lifecycle_event.split(':');
+  if (terminalCommand[0] === 'seed') {
+    config[terminalCommand[1]];
+    process.env.NODE_ENV = terminalCommand[1];
+    process.env.DB_URL = config[terminalCommand[1]].DB_URL;
+  } else {
+    process.env.NODE_ENV = terminalCommand[1];
+    process.env.DB_URL = config.dev.DB_URL;
+  }
+}
+
+const currentEnv = process.env.NODE_ENV;
 const articlesData = require(`./${currentEnv}Data/articles.json`);
 const commentsData = require(`./${currentEnv}Data/comments.json`);
 const topicsData = require(`./${currentEnv}Data/topics.json`);
@@ -57,7 +72,7 @@ const createSeed = () => {
       ]);
     })
     .then(([seededArticles, seededTopics, seededUsers, seededComments]) => {
-      console.log('Databases seeded');
+      // console.log('Databases seeded');
       return { seededArticles, seededTopics, seededUsers, seededComments };
     })
     .catch({ status: 500, msg: 'Databases not seeded.' });

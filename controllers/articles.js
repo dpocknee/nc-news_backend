@@ -1,5 +1,3 @@
-const mongoose = require('mongoose');
-const DB_URL = process.env.DB_URL;
 const {
   getArrayOfValidElements,
   errorCreator,
@@ -9,16 +7,9 @@ const { Topic, Article, Comment, User } = require('../models/');
 
 exports.getArticles = (req, res, next) => {
   // All topics
-  return mongoose
-    .connect(DB_URL)
-    .then(() => {
-      return Article.find();
-    })
+  return Article.find()
     .then(foundArticles => {
       return res.send(foundArticles);
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(next);
 };
@@ -31,26 +22,31 @@ exports.getArticlesById = (req, res, next) => {
     parameter: '_id',
     name: 'article'
   };
-  return mongoose
-    .connect(DB_URL)
-    .then(() => {
-      return getArrayOfValidElements(id.model, id.parameter);
-    })
+  return getArrayOfValidElements(id.model, id.parameter)
     .then(validThings => {
-      errorCreator(validThings, id.identifier, 404, id.name, next);
-      return Promise.all([
-        Article.find()
-          .where(id.parameter)
-          .equals(id.identifier)
-          .lean(),
-        commentCount(
-          Comment,
-          'belongs_to',
-          id.model,
-          id.parameter,
-          id.identifier
-        )
-      ]);
+      const error1 = errorCreator(
+        validThings,
+        id.identifier,
+        404,
+        id.name,
+        next
+      );
+      if (error1) return Promise.reject(error1);
+      else {
+        return Promise.all([
+          Article.find()
+            .where(id.parameter)
+            .equals(id.identifier)
+            .lean(),
+          commentCount(
+            Comment,
+            'belongs_to',
+            id.model,
+            id.parameter,
+            id.identifier
+          )
+        ]);
+      }
     })
     .then(([foundArticles, countValue]) => {
       const outputArticles = foundArticles.map(article => {
@@ -61,47 +57,56 @@ exports.getArticlesById = (req, res, next) => {
         return res.status(200).send(outputArticles);
       } else return foundArticles;
     })
-    .then(() => {
-      return mongoose.disconnect();
-    })
     .catch(next);
 };
 
 exports.getCommentsByArticle = (req, res, next) => {
   //GET /api/articles/:article_id/comments
-  return mongoose
-    .connect(DB_URL)
-    .then(() => {
-      return getArrayOfValidElements(Article, '_id');
-    })
+  return getArrayOfValidElements(Article, '_id')
     .then(validThings => {
-      errorCreator(validThings, req.params.article_id, 404, 'article', next);
-      return Comment.find()
-        .where('belongs_to')
-        .equals(req.params.article_id)
-        .lean();
+      const errorChecker1 = errorCreator(
+        validThings,
+        req.params.article_id,
+        404,
+        'article',
+        next
+      );
+      if (errorChecker1) return Promise.reject(errorChecker1);
+      else {
+        return Comment.find()
+          .where('belongs_to')
+          .equals(req.params.article_id)
+          .lean();
+      }
     })
     .then(foundComments => {
       return res.status(200).send(foundComments);
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(next);
 };
 
 exports.addCommentsByArticle = (req, res, next) => {
-  return mongoose
-    .connect(DB_URL)
-    .then(() => {
-      return Promise.all([
-        getArrayOfValidElements(Article, '_id'),
-        getArrayOfValidElements(User, '_id')
-      ]);
-    })
+  return Promise.all([
+    getArrayOfValidElements(Article, '_id'),
+    getArrayOfValidElements(User, '_id')
+  ])
     .then(([validArticles, validUsers]) => {
-      errorCreator(validArticles, req.params.article_id, 400, 'article', next);
-      errorCreator(validUsers, req.body.created_by, 400, 'user', next);
+      const errorChecker1 = errorCreator(
+        validArticles,
+        req.params.article_id,
+        400,
+        'article',
+        next
+      );
+      const errorChecker2 = errorCreator(
+        validUsers,
+        req.body.created_by,
+        400,
+        'user',
+        next
+      );
+      if (errorChecker1) return next(errorChecker1);
+      if (errorChecker2) return next(errorChecker2);
       if (req.body.body === undefined)
         return next({
           status: 400,
@@ -122,9 +127,6 @@ exports.addCommentsByArticle = (req, res, next) => {
     .then(postedArticle => {
       return res.status(201).send(postedArticle);
     })
-    .then(() => {
-      return mongoose.disconnect();
-    })
     .catch(next);
 };
 
@@ -135,19 +137,22 @@ exports.changeVotes = (req, res, next) => {
     parameter: '_id',
     name: 'article'
   };
-  return mongoose
-    .connect(DB_URL)
-    .then(() => {
-      return getArrayOfValidElements(id.model, id.parameter);
-    })
+  return getArrayOfValidElements(id.model, id.parameter)
     .then(validThings => {
-      errorCreator(validThings, id.identifier, 404, id.name, next);
+      const errorChecker = errorCreator(
+        validThings,
+        id.identifier,
+        404,
+        id.name,
+        next
+      );
+      if (errorChecker) return Promise.reject(errorChecker);
       const queryKeys = Object.keys(req.query);
       if (queryKeys.length > 0 && !queryKeys.includes('vote')) {
-        return next({ status: 400, msg: 'Not a valid query.' });
+        return Promise.reject({ status: 400, msg: 'Not a valid query.' });
       }
       if (req.query.vote !== 'up' && req.query.vote !== 'down')
-        return next({ status: 400, msg: 'Not a valid query key.' });
+        return Promise.reject({ status: 400, msg: 'Not a valid query key.' });
       return Promise.all([
         Article.find()
           .where('_id')
@@ -178,9 +183,6 @@ exports.changeVotes = (req, res, next) => {
     })
     .then(updatedArticles => {
       return res.status(201).send(updatedArticles);
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(next);
 };
