@@ -1,6 +1,6 @@
 # Northcoders News
 
-This is an API to serve Northcoders-related news from a Mongo database.
+This is an API to serve Northcoders-related news from a Mongo database. A working version can be found at: https://frozen-river-28585.herokuapp.com/api.
 
 ## Getting Started
 
