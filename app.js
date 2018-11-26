@@ -6,7 +6,7 @@ const app = express();
 const config = !process.env.NODE_ENV ? require('./config') : '';
 process.env.NODE_ENV = 'test' ? 'test' : 'dev';
 const ENV = process.env.NODE_ENV === 'test' ? 'test' : 'dev';
-process.env.DB_URL = config[ENV].DB_URL;
+process.env.DB_URL = process.env.DB_URL || config[ENV].DB_URL;
 const DB_URL = process.env.DB_URL;
 
 mongoose.connect(DB_URL);
