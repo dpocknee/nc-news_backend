@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const apiRouter = require('./routes/api');
 const app = express();
-const config = require('./config');
+const config = !process.env.NODE_ENV ? require('./config') : '';
 process.env.NODE_ENV = 'test' ? 'test' : 'dev';
 const ENV = process.env.NODE_ENV === 'test' ? 'test' : 'dev';
 process.env.DB_URL = config[ENV].DB_URL;
