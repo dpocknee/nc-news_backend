@@ -78,8 +78,7 @@ exports.getCommentsByArticle = (req, res, next) => {
         return Comment.find()
           .where('belongs_to')
           .equals(req.params.article_id)
-          .lean()
-          .populate('created_by');
+          .lean();
       }
     })
     .then(foundComments => {
