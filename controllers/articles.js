@@ -8,6 +8,7 @@ const { Topic, Article, Comment, User } = require('../models/');
 exports.getArticles = (req, res, next) => {
   // All topics
   return Article.find()
+    .populate('created_by')
     .then(foundArticles => {
       return res.send(foundArticles);
     })
