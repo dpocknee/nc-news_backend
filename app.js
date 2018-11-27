@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 const apiRouter = require('./routes/api');
+const cors = require('cors')
+
 const app = express();
+
 const config = !process.env.NODE_ENV ? require('./config') : '';
 process.env.NODE_ENV = 'test' ? 'test' : 'dev';
 const ENV = process.env.NODE_ENV === 'test' ? 'test' : 'dev';
@@ -13,6 +16,8 @@ mongoose.connect(DB_URL);
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
+
+app.use(cors())
 app.use(bodyParser.json());
 
 app.use('/api', apiRouter);
