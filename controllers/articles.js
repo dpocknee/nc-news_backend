@@ -37,7 +37,8 @@ exports.getArticlesById = (req, res, next) => {
           Article.find()
             .where(id.parameter)
             .equals(id.identifier)
-            .lean(),
+            .lean()
+            .populate('created_by'),
           commentCount(
             Comment,
             'belongs_to',
@@ -76,7 +77,8 @@ exports.getCommentsByArticle = (req, res, next) => {
         return Comment.find()
           .where('belongs_to')
           .equals(req.params.article_id)
-          .lean();
+          .lean()
+          .populate('created_by');
       }
     })
     .then(foundComments => {
@@ -156,7 +158,8 @@ exports.changeVotes = (req, res, next) => {
       return Promise.all([
         Article.find()
           .where('_id')
-          .equals(req.params.article_id),
+          .equals(req.params.article_id)
+          .populate('created_by'),
         commentCount(
           Comment,
           'belongs_to',
