@@ -125,7 +125,7 @@ exports.addCommentsByArticle = (req, res, next) => {
         belongs_to: req.params.article_id,
         created_by: req.body.created_by
       });
-      return newComment.save().populate('created_by');
+      return newComment.save();
     })
     .then(postedArticle => {
       return res.status(201).send(postedArticle);
