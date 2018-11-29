@@ -71,7 +71,7 @@ exports.deleteComment = (req, res, next) => {
         next
       );
       if (errorChecker) return Promise.reject(errorChecker);
-      else return Comment.findByIdAndRemove(id.identifier).populate('created_by');
+      else return Comment.findByIdAndRemove(id.identifier);
     })
     .then(removedComment => {
       return res.status(202).send(removedComment);
