@@ -108,8 +108,8 @@ exports.addCommentsByArticle = (req, res, next) => {
         'user',
         next
       );
-      if (errorChecker1) return next(errorChecker1);
-      if (errorChecker2) return next(errorChecker2);
+      if (errorChecker1) return Promise.reject(errorChecker1);
+      if (errorChecker2) return Promise.reject(errorChecker2);
       if (req.body.body === undefined)
         return next({
           status: 400,
@@ -127,8 +127,9 @@ exports.addCommentsByArticle = (req, res, next) => {
       });
       return newComment.save();
     })
-    .then(newComment => {
-      return newComment.populate('created_by');
+    .then(returnedComment => {
+      if (!returnedComment) return Promise.reject({ msg: 'invalid request' });
+      return Comment.findById(returnedComment._id).populate('created_by');
     })
     .then(postedArticle => {
       return res.status(201).send(postedArticle);

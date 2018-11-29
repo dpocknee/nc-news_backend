@@ -211,7 +211,7 @@ describe('/api', () => {
               .expect(201)
               .then(res => {
                 expect(res.body.body).to.equal(testComment.body);
-                expect(res.body.created_by).to.equal(
+                expect(res.body.created_by._id).to.equal(
                   String(testComment.created_by)
                 );
               });
