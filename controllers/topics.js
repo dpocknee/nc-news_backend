@@ -34,6 +34,7 @@ exports.getArticlesByTopic = (req, res, next) => {
     .then(() => {
       return Promise.all([
         Article.find()
+          .populate('created_by')
           .where('belongs_to')
           .equals(req.params.topic_slug)
           .lean(),

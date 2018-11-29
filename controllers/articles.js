@@ -38,8 +38,7 @@ exports.getArticlesById = (req, res, next) => {
           Article.find()
             .where(id.parameter)
             .equals(id.identifier)
-            .lean()
-            .populate('created_by'),
+            .lean(),
           commentCount(
             Comment,
             'belongs_to',
