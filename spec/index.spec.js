@@ -88,7 +88,9 @@ describe('/api', () => {
             .send(testArticle)
             .expect(201)
             .then(res => {
-              expect(res.body).to.include(testArticle);
+              expect(res.body.title).to.equal(testArticle.title);
+              expect(res.body.body).to.equal(testArticle.body);
+              expect(res.body.created_by._id).to.equal(testArticle.created_by);
             })
             .catch(console.log);
         });

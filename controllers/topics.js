@@ -90,7 +90,7 @@ exports.addArticleByTopic = (req, res, next) => {
       return newArticle.save();
     })
     .then(postedArticle => {
-      return postedArticle.populate('created_by');
+      return Article.findById(postedArticle._id).populate('created_by');
     })
     .then(populatedArticle => {
       return res.status(201).send(populatedArticle);
