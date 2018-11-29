@@ -78,7 +78,8 @@ exports.getCommentsByArticle = (req, res, next) => {
         return Comment.find()
           .where('belongs_to')
           .equals(req.params.article_id)
-          .lean();
+          .lean()
+          .populate('created_by');
       }
     })
     .then(foundComments => {
@@ -124,7 +125,7 @@ exports.addCommentsByArticle = (req, res, next) => {
         belongs_to: req.params.article_id,
         created_by: req.body.created_by
       });
-      return newComment.save();
+      return newComment.save().populate('created_by');
     })
     .then(postedArticle => {
       return res.status(201).send(postedArticle);
