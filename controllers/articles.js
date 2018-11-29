@@ -36,6 +36,7 @@ exports.getArticlesById = (req, res, next) => {
       else {
         return Promise.all([
           Article.find()
+          .populate('created_by')
             .where(id.parameter)
             .equals(id.identifier)
             .lean(),

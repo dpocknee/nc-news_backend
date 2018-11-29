@@ -150,7 +150,7 @@ describe('/api', () => {
       });
 
       describe('/:article_id', () => {
-        it('GET status 200 returns an an article by ID - checks content', () => {
+        it('GET status 200 returns an article by ID - checks content', () => {
           const articleId = allInfo.seededArticles[0]._id;
           return request
             .get(`/api/articles/${articleId}`)
