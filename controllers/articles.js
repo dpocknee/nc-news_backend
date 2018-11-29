@@ -127,6 +127,9 @@ exports.addCommentsByArticle = (req, res, next) => {
       });
       return newComment.save();
     })
+    .then(newComment => {
+      return newComment.populate('created_by');
+    })
     .then(postedArticle => {
       return res.status(201).send(postedArticle);
     })
