@@ -421,13 +421,23 @@ describe('/api', () => {
           });
       });
     });
-    describe('/api/users/:username/articles', () => {
-      it('GET status 200 returns an array of articles by a user (checks number and content)', () => {
+    describe.only('/api/users/:username/articles', () => {
+      it('GET status 200 returns an array of articles by a user', () => {
         return request
           .get('/api/users/dedekind561/articles')
           .expect(200)
           .then(res => {
             expect(res.body.length).to.equal(2);
+          });
+      });
+    });
+    describe.only('/api/users/:username/comments', () => {
+      it('GET status 200 returns an array of comments by a user', () => {
+        return request
+          .get('/api/users/dedekind561/comments')
+          .expect(200)
+          .then(res => {
+            expect(res.body.length).to.equal(4);
           });
       });
     });

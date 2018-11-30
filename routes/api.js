@@ -21,7 +21,8 @@ const {
 
 const {
   getUserByUsername,
-  getArticlesByUsername
+  getArticlesByUsername,
+  getCommentsByUsername
 } = require('../controllers/users');
 
 // ---Routers---
@@ -49,6 +50,7 @@ apiRouter
   .delete(deleteComment);
 
 apiRouter.route('/users/:username/articles').get(getArticlesByUsername);
+apiRouter.route('/users/:username/comments').get(getCommentsByUsername);
 apiRouter.route('/users/:username').get(getUserByUsername);
 
 module.exports = apiRouter;

@@ -41,7 +41,7 @@ exports.getArticlesByUsername = (req, res, next) => {
         validUsers,
         req.params.username,
         404,
-        'topic',
+        'user',
         next
       );
       return isThereAnError ? Promise.reject(isThereAnError) : 0;
@@ -54,6 +54,33 @@ exports.getArticlesByUsername = (req, res, next) => {
     })
     .then(foundArticles => {
       return res.status(200).send(foundArticles);
+    })
+    .catch(next);
+};
+
+exports.getCommentsByUsername = (req, res, next) => {
+  // users/:username/articles
+  return getArrayOfValidElements(User, 'username')
+    .then(validUsers => {
+      const isThereAnError = errorCreator(
+        validUsers,
+        req.params.username,
+        404,
+        'user',
+        next
+      );
+      return isThereAnError ? Promise.reject(isThereAnError) : 0;
+    })
+    .then(() => {
+      return User.findOne().where({ username: req.params.username });
+    })
+    .then(user => {
+      return Comment.find({ created_by: user._id })
+        .populate('created_by')
+        .populate('belongs_to');
+    })
+    .then(foundComments => {
+      return res.status(200).send(foundComments);
     })
     .catch(next);
 };
