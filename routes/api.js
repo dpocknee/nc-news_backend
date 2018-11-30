@@ -1,4 +1,5 @@
 const apiRouter = require('express').Router();
+
 const {
   getDefault,
   getTopics,
@@ -18,7 +19,12 @@ const {
   deleteComment
 } = require('../controllers/comments');
 
-const { getUserByUsername } = require('../controllers/users');
+const {
+  getUserByUsername,
+  getArticlesByUsername
+} = require('../controllers/users');
+
+// ---Routers---
 
 apiRouter.route('/').get(getDefault);
 apiRouter.route('/topics').get(getTopics);
@@ -42,6 +48,7 @@ apiRouter
   .patch(changeCommentVotes)
   .delete(deleteComment);
 
+apiRouter.route('/users/:username/articles').get(getArticlesByUsername);
 apiRouter.route('/users/:username').get(getUserByUsername);
 
 module.exports = apiRouter;

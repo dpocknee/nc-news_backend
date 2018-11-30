@@ -32,3 +32,28 @@ exports.getUserByUsername = (req, res, next) => {
     })
     .catch(next);
 };
+
+exports.getArticlesByUsername = (req, res, next) => {
+  // users/:username/articles
+  return getArrayOfValidElements(User, 'username')
+    .then(validUsers => {
+      const isThereAnError = errorCreator(
+        validUsers,
+        req.params.username,
+        404,
+        'topic',
+        next
+      );
+      return isThereAnError ? Promise.reject(isThereAnError) : 0;
+    })
+    .then(() => {
+      return User.findOne().where({ username: req.params.username });
+    })
+    .then(user => {
+      return Article.find({ created_by: user._id }).populate('created_by');
+    })
+    .then(foundArticles => {
+      return res.status(200).send(foundArticles);
+    })
+    .catch(next);
+};

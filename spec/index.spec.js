@@ -421,5 +421,15 @@ describe('/api', () => {
           });
       });
     });
+    describe('/api/users/:username/articles', () => {
+      it('GET status 200 returns an array of articles by a user (checks number and content)', () => {
+        return request
+          .get('/api/users/dedekind561/articles')
+          .expect(200)
+          .then(res => {
+            expect(res.body.length).to.equal(2);
+          });
+      });
+    });
   });
 });
