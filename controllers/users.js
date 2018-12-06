@@ -59,7 +59,7 @@ exports.getArticlesByUsername = (req, res, next) => {
 };
 
 exports.getCommentsByUsername = (req, res, next) => {
-  // users/:username/articles
+  // users/:username/comments
   return getArrayOfValidElements(User, 'username')
     .then(validUsers => {
       const isThereAnError = errorCreator(
