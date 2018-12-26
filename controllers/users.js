@@ -1,86 +1,44 @@
 const { getArrayOfValidElements, errorCreator } = require('../utils');
-const { Topic, Article, Comment, User } = require('../models/');
+const { Article, Comment, User } = require('../models/');
 
+// GET /api/users/:username
+// e.g: `/api/users/mitch123`
+// Returns a JSON object with the profile data for the specified user.
 exports.getUserByUsername = (req, res, next) => {
-  // GET /api/users/:username
-  //# e.g: `/api/users/mitch123`
-  // Returns a JSON object with the profile data for the specified user.
-  const id = {
-    model: User,
-    identifier: req.params.username,
-    parameter: 'username',
-    name: 'user'
-  };
-  return getArrayOfValidElements(id.model, id.parameter)
+  const { username } = req.params;
+  return getArrayOfValidElements(User, 'username')
     .then(validThings => {
-      const errorChecker = errorCreator(
-        validThings,
-        id.identifier,
-        404,
-        id.name,
-        next
-      );
+      const errorChecker = errorCreator(validThings, username, 404, 'user', next);
       if (errorChecker) return Promise.reject(errorChecker);
-      else
-        return User.findOne()
-          .where(id.parameter)
-          .equals(id.identifier)
-          .lean();
+      return User.findOne()
+        .where('username')
+        .equals(username)
+        .lean();
     })
-    .then(foundUser => {
-      return res.status(200).send(foundUser);
-    })
+    .then(foundUser => res.status(200).send(foundUser))
     .catch(next);
 };
 
-exports.getArticlesByUsername = (req, res, next) => {
-  // users/:username/articles
-  return getArrayOfValidElements(User, 'username')
-    .then(validUsers => {
-      const isThereAnError = errorCreator(
-        validUsers,
-        req.params.username,
-        404,
-        'user',
-        next
-      );
-      return isThereAnError ? Promise.reject(isThereAnError) : 0;
-    })
-    .then(() => {
-      return User.findOne().where({ username: req.params.username });
-    })
-    .then(user => {
-      return Article.find({ created_by: user._id }).populate('created_by');
-    })
-    .then(foundArticles => {
-      return res.status(200).send(foundArticles);
-    })
-    .catch(next);
-};
+// users/:username/articles
+exports.getArticlesByUsername = (req, res, next) => getArrayOfValidElements(User, 'username')
+  .then(validUsers => {
+    const isThereAnError = errorCreator(validUsers, req.params.username, 404, 'user', next);
+    return isThereAnError ? Promise.reject(isThereAnError) : 0;
+  })
+  .then(() => User.findOne().where({ username: req.params.username }))
+  .then(user => Article.find({ created_by: user._id }).populate('created_by'))
+  .then(foundArticles => res.status(200).send(foundArticles))
+  .catch(next);
 
-exports.getCommentsByUsername = (req, res, next) => {
-  // users/:username/comments
-  return getArrayOfValidElements(User, 'username')
-    .then(validUsers => {
-      const isThereAnError = errorCreator(
-        validUsers,
-        req.params.username,
-        404,
-        'user',
-        next
-      );
-      return isThereAnError ? Promise.reject(isThereAnError) : 0;
-    })
-    .then(() => {
-      return User.findOne().where({ username: req.params.username });
-    })
-    .then(user => {
-      return Comment.find({ created_by: user._id })
-        .populate('created_by')
-        .populate('belongs_to');
-    })
-    .then(foundComments => {
-      return res.status(200).send(foundComments);
-    })
-    .catch(next);
-};
+// users/:username/comments
+exports.getCommentsByUsername = (req, res, next) => getArrayOfValidElements(User, 'username')
+  .then(validUsers => {
+    const isThereAnError = errorCreator(validUsers, req.params.username, 404, 'user', next);
+    return isThereAnError ? Promise.reject(isThereAnError) : 0;
+  })
+  .then(() => User.findOne().where({ username: req.params.username }))
+  .then(user => Comment.find({ created_by: user._id })
+    .populate('created_by')
+    .populate('belongs_to'))
+  .then(foundComments => res.status(200).send(foundComments))
+  .catch(next);

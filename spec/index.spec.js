@@ -1,82 +1,64 @@
-const config = require('../config');
+/* eslint no-undef: 0, import/order: 0 */
+const { expect } = require('chai');
+const mongoose = require('mongoose');
 const app = require('../app');
 const request = require('supertest')(app);
-const { expect } = require('chai');
 const createSeed = require('../seed/createSeed');
-const mongoose = require('mongoose');
-let allInfo;
+const config = require('../config');
 
+let allInfo;
 process.env.DB_URL = config.test.DB_URL;
-const DB_URL = process.env.DB_URL;
 
 describe('/api', () => {
-  beforeEach(() => {
-    return createSeed().then(seedInfo => {
-      allInfo = seedInfo;
-      return seedInfo;
-    });
-  });
+  beforeEach(() => createSeed().then(seedInfo => {
+    allInfo = seedInfo;
+    return seedInfo;
+  }));
   after(() => mongoose.disconnect());
 
   describe('/api', () => {
-    it('GET return status 200 a html page of imformation', () => {
-      return request
-        .get('/api')
-        .expect(200)
-        .then(res => {
-          expect(res.text.slice(0, 15)).to.equal('<!DOCTYPE html>');
-        });
-    });
-    it('GET return status 404 error page not found', () => {
-      return request.get('/wrong').expect(404);
-    });
+    it('GET return status 200 a html page of imformation', () => request
+      .get('/api')
+      .expect(200)
+      .then(res => {
+        expect(res.text.slice(0, 15)).to.equal('<!DOCTYPE html>');
+      }));
+    it('GET return status 404 error page not found', () => request.get('/wrong').expect(404));
     // -----------------TOPICS ----------------------------
     describe('/topics', () => {
-      it('GET status 200 returns an array of all topics - checks number', () => {
-        return request
-          .get('/api/topics')
+      it('GET status 200 returns an array of all topics - checks number', () => request
+        .get('/api/topics')
+        .expect(200)
+        .then(res => {
+          expect(res.body.length).to.equal(2);
+        }));
+      it('GET status 200 returns an array of all topics - checks content', () => request
+        .get('/api/topics')
+        .expect(200)
+        .then(res => {
+          expect(res.body[0].title).to.equal('Mitch');
+          expect(res.body[0].slug).to.equal('mitch');
+        }));
+      describe('/api/topics/:topic_slug/articles', () => {
+        it('GET status 200 returns an array of articles related to a particular topic slug (checks number and content)', () => request
+          .get('/api/topics/cats/articles')
           .expect(200)
           .then(res => {
             expect(res.body.length).to.equal(2);
-          });
-      });
-      it('GET status 200 returns an array of all topics - checks content', () => {
-        return request
-          .get('/api/topics')
+          }));
+        it('GET status 200 returns an array of articles related to a particular topic slug (checks content)', () => request
+          .get('/api/topics/cats/articles')
           .expect(200)
           .then(res => {
-            expect(res.body[0].title).to.equal('Mitch');
-            expect(res.body[0].slug).to.equal('mitch');
-          });
-      });
-      describe('/api/topics/:topic_slug/articles', () => {
-        it('GET status 200 returns an array of articles related to a particular topic slug (checks number and content)', () => {
-          return request
-            .get('/api/topics/cats/articles')
-            .expect(200)
-            .then(res => {
-              expect(res.body.length).to.equal(2);
-            });
-        });
-        it('GET status 200 returns an array of articles related to a particular topic slug (checks content)', () => {
-          return request
-            .get('/api/topics/cats/articles')
-            .expect(200)
-            .then(res => {
-              expect(res.body[0].title).to.equal(
-                "They're not exactly dogs, are they?"
-              );
-              expect(res.body[0].body).to.equal('Well? Think about it.');
-            });
-        });
-        it('GET status 404 returns message "x is not a valid topic"', () => {
-          return request
-            .get('/api/topics/jam/articles')
-            .expect(404)
-            .then(res => {
-              expect(res.body.message).to.equal('jam is not a valid topic!');
-            });
-        });
+            expect(res.body[0].title).to.equal("They're not exactly dogs, are they?");
+            expect(res.body[0].body).to.equal('Well? Think about it.');
+          }));
+        it('GET status 404 returns message "x is not a valid topic"', () => request
+          .get('/api/topics/jam/articles')
+          .expect(404)
+          .then(res => {
+            expect(res.body.message).to.equal('jam is not a valid topic!');
+          }));
         it('POST status 201 adds a new article to a topic (checks content)', () => {
           const testArticle = {
             title: 'new article',
@@ -105,9 +87,7 @@ describe('/api', () => {
             .send(testArticle)
             .expect(404)
             .then(res => {
-              expect(res.body.message).to.equal(
-                'fearOfDeath is not a valid topic!'
-              );
+              expect(res.body.message).to.equal('fearOfDeath is not a valid topic!');
             });
         });
         it('POST status 404 returns message x is not a valid user', () => {
@@ -121,35 +101,25 @@ describe('/api', () => {
             .send(testArticle)
             .expect(404)
             .then(res => {
-              expect(res.body.message).to.equal(
-                '5be429573f197771ab42196b is not a valid user!'
-              );
+              expect(res.body.message).to.equal('5be429573f197771ab42196b is not a valid user!');
             });
         });
       });
     });
     describe('/articles', () => {
-      it('GET status 200 returns an array of all articles - checks number', () => {
-        return request
-          .get('/api/articles')
-          .expect(200)
-          .then(res => {
-            expect(res.body.length).to.equal(4);
-          });
-      });
-      it('GET status 200 returns an array of all articles - checks content', () => {
-        return request
-          .get('/api/articles')
-          .expect(200)
-          .then(res => {
-            expect(res.body[0].title).to.equal(
-              'Living in the shadow of a great man'
-            );
-            expect(res.body[0].body).to.equal(
-              'I find this existence challenging'
-            );
-          });
-      });
+      it('GET status 200 returns an array of all articles - checks number', () => request
+        .get('/api/articles')
+        .expect(200)
+        .then(res => {
+          expect(res.body.length).to.equal(4);
+        }));
+      it('GET status 200 returns an array of all articles - checks content', () => request
+        .get('/api/articles')
+        .expect(200)
+        .then(res => {
+          expect(res.body[0].title).to.equal('Living in the shadow of a great man');
+          expect(res.body[0].body).to.equal('I find this existence challenging');
+        }));
 
       describe('/:article_id', () => {
         it('GET status 200 returns an article by ID - checks content', () => {
@@ -158,25 +128,17 @@ describe('/api', () => {
             .get(`/api/articles/${articleId}`)
             .expect(200)
             .then(res => {
-              expect(res.body[0].title).to.equal(
-                'Living in the shadow of a great man'
-              );
-              expect(res.body[0].body).to.equal(
-                'I find this existence challenging'
-              );
+              expect(res.body[0].title).to.equal('Living in the shadow of a great man');
+              expect(res.body[0].body).to.equal('I find this existence challenging');
               expect(res.body.length).to.equal(1);
             });
         });
-        it('GET status 404 returns "article id x does not exist"', () => {
-          return request
-            .get(`/api/articles/5be429573f197771ab42196b`)
-            .expect(404)
-            .then(res => {
-              expect(res.body.message).to.equal(
-                '5be429573f197771ab42196b is not a valid article!'
-              );
-            });
-        });
+        it('GET status 404 returns "article id x does not exist"', () => request
+          .get('/api/articles/5be429573f197771ab42196b')
+          .expect(404)
+          .then(res => {
+            expect(res.body.message).to.equal('5be429573f197771ab42196b is not a valid article!');
+          }));
         describe('/comments', () => {
           it('GET status 200 returns array of comments for article', () => {
             const articleId = allInfo.seededArticles[0]._id;
@@ -190,16 +152,14 @@ describe('/api', () => {
                 expect(res.body.length).to.equal(2);
               });
           });
-          it('GET status 404 returns "article id x does not exist"', () => {
-            return request
-              .get(`/api/articles/5be429573f197771ab42196b/comments`)
-              .expect(404)
-              .then(res => {
-                expect(res.body.message).to.equal(
-                  '5be429573f197771ab42196b is not a valid article!'
-                );
-              });
-          });
+          it('GET status 404 returns "article id x does not exist"', () => request
+            .get('/api/articles/5be429573f197771ab42196b/comments')
+            .expect(404)
+            .then(res => {
+              expect(res.body.message).to.equal(
+                '5be429573f197771ab42196b is not a valid article!'
+              );
+            }));
           it('POST return 201 adds a new comment to an article', () => {
             const articleId = allInfo.seededArticles[0]._id;
             const userId = allInfo.seededUsers[0]._id;
@@ -213,21 +173,17 @@ describe('/api', () => {
               .expect(201)
               .then(res => {
                 expect(res.body.body).to.equal(testComment.body);
-                expect(res.body.created_by._id).to.equal(
-                  String(testComment.created_by)
-                );
+                expect(res.body.created_by._id).to.equal(String(testComment.created_by));
               });
           });
-          it('POST status 404 returns "article id x does not exist"', () => {
-            return request
-              .get(`/api/articles/5be429573f197771ab42196b/comments`)
-              .expect(404)
-              .then(res => {
-                expect(res.body.message).to.equal(
-                  '5be429573f197771ab42196b is not a valid article!'
-                );
-              });
-          });
+          it('POST status 404 returns "article id x does not exist"', () => request
+            .get('/api/articles/5be429573f197771ab42196b/comments')
+            .expect(404)
+            .then(res => {
+              expect(res.body.message).to.equal(
+                '5be429573f197771ab42196b is not a valid article!'
+              );
+            }));
 
           it('POST status 400 return error about missing body ', () => {
             const articleId = allInfo.seededArticles[0]._id;
@@ -240,14 +196,11 @@ describe('/api', () => {
               .send(testComment)
               .expect(400)
               .then(res => {
-                expect(res.body.message).to.equal(
-                  'Request did not include a "body" value.'
-                );
+                expect(res.body.message).to.equal('Request did not include a "body" value.');
               });
           });
           it('POST status 400 return error about missing created_by ', () => {
             const articleId = allInfo.seededArticles[0]._id;
-            const userId = allInfo.seededUsers[0]._id;
             const testComment = {
               body: 'This is my new comment'
             };
@@ -256,9 +209,7 @@ describe('/api', () => {
               .send(testComment)
               .expect(400)
               .then(res => {
-                expect(res.body.message).to.equal(
-                  'undefined is not a valid user!'
-                );
+                expect(res.body.message).to.equal('undefined is not a valid user!');
               });
           });
           it('POST status 400 return error about invalid User ID ', () => {
@@ -272,9 +223,7 @@ describe('/api', () => {
               .send(testComment)
               .expect(400)
               .then(res => {
-                expect(res.body.message).to.equal(
-                  '5be429573f197771ab42196b is not a valid user!'
-                );
+                expect(res.body.message).to.equal('5be429573f197771ab42196b is not a valid user!');
               });
           });
         });
@@ -299,16 +248,12 @@ describe('/api', () => {
             expect(res.body).to.include({ votes: -1 });
           });
       });
-      it('PATCH status 404 returns "article id x does not exist"', () => {
-        return request
-          .patch(`/api/articles/5be429573f197771ab42196b?vote=up`)
-          .expect(404)
-          .then(res => {
-            expect(res.body.message).to.equal(
-              '5be429573f197771ab42196b is not a valid article!'
-            );
-          });
-      });
+      it('PATCH status 404 returns "article id x does not exist"', () => request
+        .patch('/api/articles/5be429573f197771ab42196b?vote=up')
+        .expect(404)
+        .then(res => {
+          expect(res.body.message).to.equal('5be429573f197771ab42196b is not a valid article!');
+        }));
       it('PATCH status 400 return "errors for invalid queries"', () => {
         const articleId = allInfo.seededArticles[0]._id;
         return request
@@ -347,16 +292,12 @@ describe('/api', () => {
             expect(res.body).to.include({ votes: 6 });
           });
       });
-      it('PATCH status 404 returns "comment id x does not exist"', () => {
-        return request
-          .patch(`/api/comments/5be429573f197771ab42196b?vote=up`)
-          .expect(404)
-          .then(res => {
-            expect(res.body.message).to.equal(
-              '5be429573f197771ab42196b is not a valid comment!'
-            );
-          });
-      });
+      it('PATCH status 404 returns "comment id x does not exist"', () => request
+        .patch('/api/comments/5be429573f197771ab42196b?vote=up')
+        .expect(404)
+        .then(res => {
+          expect(res.body.message).to.equal('5be429573f197771ab42196b is not a valid comment!');
+        }));
       it('PATCH status 400 return "errors for invalid queries"', () => {
         const commentId = allInfo.seededComments[0]._id;
         return request
@@ -386,16 +327,12 @@ describe('/api', () => {
             });
           });
       });
-      it('DELETE status 404 returns "comment id x does not exist"', () => {
-        return request
-          .delete(`/api/comments/5be429573f197771ab42196b`)
-          .expect(404)
-          .then(res => {
-            expect(res.body.message).to.equal(
-              '5be429573f197771ab42196b is not a valid comment!'
-            );
-          });
-      });
+      it('DELETE status 404 returns "comment id x does not exist"', () => request
+        .delete('/api/comments/5be429573f197771ab42196b')
+        .expect(404)
+        .then(res => {
+          expect(res.body.message).to.equal('5be429573f197771ab42196b is not a valid comment!');
+        }));
     });
     describe('/users/username', () => {
       it('GET status 200 return user by username', () => {
@@ -410,36 +347,28 @@ describe('/api', () => {
             });
           });
       });
-      it('GET status 404 return user x does not exist ', () => {
-        return request
-          .get(`/api/users/5be429573f197771ab42196b`)
-          .expect(404)
-          .then(res => {
-            expect(res.body.message).to.equal(
-              '5be429573f197771ab42196b is not a valid user!'
-            );
-          });
-      });
+      it('GET status 404 return user x does not exist ', () => request
+        .get('/api/users/5be429573f197771ab42196b')
+        .expect(404)
+        .then(res => {
+          expect(res.body.message).to.equal('5be429573f197771ab42196b is not a valid user!');
+        }));
     });
     describe.only('/api/users/:username/articles', () => {
-      it('GET status 200 returns an array of articles by a user', () => {
-        return request
-          .get('/api/users/dedekind561/articles')
-          .expect(200)
-          .then(res => {
-            expect(res.body.length).to.equal(2);
-          });
-      });
+      it('GET status 200 returns an array of articles by a user', () => request
+        .get('/api/users/dedekind561/articles')
+        .expect(200)
+        .then(res => {
+          expect(res.body.length).to.equal(2);
+        }));
     });
     describe.only('/api/users/:username/comments', () => {
-      it('GET status 200 returns an array of comments by a user', () => {
-        return request
-          .get('/api/users/dedekind561/comments')
-          .expect(200)
-          .then(res => {
-            expect(res.body.length).to.equal(4);
-          });
-      });
+      it('GET status 200 returns an array of comments by a user', () => request
+        .get('/api/users/dedekind561/comments')
+        .expect(200)
+        .then(res => {
+          expect(res.body.length).to.equal(4);
+        }));
     });
   });
 });
