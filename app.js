@@ -3,22 +3,22 @@ const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 const apiRouter = require('./routes/api');
-const config = require('./config');
+const config = process.env.DB_URL || require('./config');
 
 const app = express();
 
 const { NODE_ENV } = process.env;
 
-if (!NODE_ENV) {
-  process.env.NODE_ENV = 'dev';
-  process.env.DB_URL = config.dev.DB_URL;
-} else {
-  process.env.DB_URL = config[NODE_ENV].DB_URL;
+if (!process.env.DB_URL) {
+  if (!NODE_ENV) {
+    process.env.NODE_ENV = 'dev';
+    process.env.DB_URL = config.dev.DB_URL;
+  } else {
+    process.env.DB_URL = config[NODE_ENV].DB_URL;
+  }
 }
 
-const { DB_URL } = process.env;
-
-mongoose.connect(DB_URL);
+mongoose.connect(process.env.DB_URL);
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));

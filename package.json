@@ -9,6 +9,7 @@
     "dev": "nodemon listen.js",
     "seed:dev": "node seed/runSeed.js",
     "seed:test": "node seed/runSeed.js",
+    "seed:production": "NODE_ENV=production node ./seed/runSeed.js",
     "lint": "./node_modules/.bin/eslint ./"
   },
   "author": "",
