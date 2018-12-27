@@ -64,13 +64,13 @@ exports.addCommentsByArticle = (req, res, next) => Promise.all([getArrayOfValidE
     if (errorChecker1) return Promise.reject(errorChecker1);
     if (errorChecker2) return Promise.reject(errorChecker2);
     if (body === undefined) {
-      return next({
+      return Promise.reject({
         status: 400,
         msg: 'Request did not include a "body" value.'
       });
     }
     if (created_by === undefined) {
-      return next({
+      return Promise.reject({
         status: 400,
         msg: 'Request did not include a "created_by" value.'
       });
@@ -90,28 +90,29 @@ exports.addCommentsByArticle = (req, res, next) => Promise.all([getArrayOfValidE
   .catch(next);
 
 exports.changeVotes = (req, res, next) => {
-  const { _id } = req.params.article;
+  const { article_id } = req.params;
+  const { vote } = req.query;
   return getArrayOfValidElements(Article, '_id')
     .then(validThings => {
-      const errorChecker = errorCreator(validThings, _id, 404, 'article');
+      const errorChecker = errorCreator(validThings, article_id, 404, 'article');
       if (errorChecker) return Promise.reject(errorChecker);
       const queryKeys = Object.keys(req.query);
       if (queryKeys.length > 0 && !queryKeys.includes('vote')) {
         return Promise.reject({ status: 400, msg: 'Not a valid query.' });
       }
-      if (req.query.vote !== 'up' && req.query.vote !== 'down') return Promise.reject({ status: 400, msg: 'Not a valid query key.' });
+      if (vote !== 'up' && vote !== 'down') return Promise.reject({ status: 400, msg: 'Not a valid query key.' });
       return Promise.all([
         Article.find()
           .where('_id')
-          .equals(req.params.article_id)
+          .equals(article_id)
           .populate('created_by'),
-        commentCount(Comment, 'belongs_to', Article, '_id', _id)
+        commentCount(Comment, 'belongs_to', Article, '_id', article_id)
       ]);
     })
     .then(([foundArticle, countValue]) => {
-      const newVotes = req.query.vote === 'up' ? foundArticle[0].votes + 1 : foundArticle[0].votes - 1;
+      const newVotes = vote === 'up' ? foundArticle[0].votes + 1 : foundArticle[0].votes - 1;
       return Article.findByIdAndUpdate(
-        req.params.article_id,
+        article_id,
         { votes: newVotes },
         { new: true },
         (err, func) => {

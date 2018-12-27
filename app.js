@@ -3,15 +3,24 @@ const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 const apiRouter = require('./routes/api');
+const config = require('./config');
 
 const app = express();
 
-const config = !process.env.NODE_ENV ? require('./config') : '';
+const { NODE_ENV } = process.env;
 
-process.env.NODE_ENV = process.env.NODE_ENV === 'test' ? 'test' : 'dev';
-const ENV = process.env.NODE_ENV === 'test' ? 'test' : 'dev';
+if (NODE_ENV === 'production') {
+  // if there is no environment defined, set to production:
+  process.env.NODE_ENV = 'production';
+} else if (NODE_ENV === 'test') {
+  // if the set up is test
+  process.env.DB_URL = config.test.DB_URL;
+} else {
+  // default is dev
+  process.env.NODE_ENV = 'dev';
+  process.env.DB_URL = config.dev.DB_URL;
+}
 
-process.env.DB_URL = process.env.DB_URL || config[ENV].DB_URL;
 const { DB_URL } = process.env;
 
 mongoose.connect(DB_URL);

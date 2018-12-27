@@ -7,13 +7,17 @@ const createSeed = require('../seed/createSeed');
 const config = require('../config');
 
 let allInfo;
+process.env.NODE_ENV = 'test';
 process.env.DB_URL = config.test.DB_URL;
 
 describe('/api', () => {
-  beforeEach(() => createSeed().then(seedInfo => {
-    allInfo = seedInfo;
-    return seedInfo;
-  }));
+  beforeEach(() => createSeed('test')
+    .then(seedInfo => {
+      allInfo = seedInfo;
+      return seedInfo;
+    })
+    .catch(err => console.log('Main beforeEach error: ', err)));
+
   after(() => mongoose.disconnect());
 
   describe('/api', () => {
@@ -74,7 +78,7 @@ describe('/api', () => {
               expect(res.body.body).to.equal(testArticle.body);
               expect(res.body.created_by._id).to.equal(testArticle.created_by);
             })
-            .catch(console.log);
+            .catch(err => console.log('ERROR from test: ', err));
         });
         it('POST status 404 returns message "x is not a valid topic"', () => {
           const testArticle = {
@@ -354,7 +358,7 @@ describe('/api', () => {
           expect(res.body.message).to.equal('5be429573f197771ab42196b is not a valid user!');
         }));
     });
-    describe.only('/api/users/:username/articles', () => {
+    describe('/api/users/:username/articles', () => {
       it('GET status 200 returns an array of articles by a user', () => request
         .get('/api/users/dedekind561/articles')
         .expect(200)
@@ -362,7 +366,7 @@ describe('/api', () => {
           expect(res.body.length).to.equal(2);
         }));
     });
-    describe.only('/api/users/:username/comments', () => {
+    describe('/api/users/:username/comments', () => {
       it('GET status 200 returns an array of comments by a user', () => request
         .get('/api/users/dedekind561/comments')
         .expect(200)

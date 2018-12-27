@@ -1,6 +1,6 @@
 const seedDB = (model, data) => model
   .insertMany(data)
   .then(dataUsed => dataUsed)
-  .catch(console.log);
+  .catch(err => console.log('ERROR from SeedDB: ', err));
 
 module.exports = seedDB;
