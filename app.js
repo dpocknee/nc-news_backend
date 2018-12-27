@@ -10,13 +10,10 @@ const app = express();
 const { NODE_ENV } = process.env;
 
 if (!NODE_ENV) {
-  process.env.NODE_ENV = 'production';
-  if (NODE_ENV === 'test') {
-    process.env.DB_URL = config.test.DB_URL;
-  } else {
-    process.env.NODE_ENV = 'dev';
-    process.env.DB_URL = config.dev.DB_URL;
-  }
+  process.env.NODE_ENV = 'dev';
+  process.env.DB_URL = config.dev.DB_URL;
+} else {
+  process.env.DB_URL = config[NODE_ENV].DB_URL;
 }
 
 const { DB_URL } = process.env;
