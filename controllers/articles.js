@@ -1,186 +1,118 @@
-const {
-  getArrayOfValidElements,
-  errorCreator,
-  commentCount
-} = require('../utils');
-const { Topic, Article, Comment, User } = require('../models/');
+const { getArrayOfValidElements, errorCreator, commentCount } = require('../utils');
+const { Article, Comment, User } = require('../models/');
 
-exports.getArticles = (req, res, next) => {
-  // All topics
-  return Article.find()
-    .populate('created_by')
-    .then(foundArticles => {
-      return res.send(foundArticles);
-    })
-    .catch(next);
-};
+// All topics
+exports.getArticles = (req, res, next) => Article.find()
+  .populate('created_by')
+  .then(foundArticles => res.send(foundArticles))
+  .catch(next);
 
+// articles/:article_id
+/* eslint no-param-reassign: 0 */
 exports.getArticlesById = (req, res, next) => {
-  // articles/:article_id
-  const id = {
-    model: Article,
-    identifier: req.params.article_id,
-    parameter: '_id',
-    name: 'article'
-  };
-  return getArrayOfValidElements(id.model, id.parameter)
+  const { article_id } = req.params;
+  return getArrayOfValidElements(Article, '_id')
     .then(validThings => {
-      const error1 = errorCreator(
-        validThings,
-        id.identifier,
-        404,
-        id.name,
-        next
-      );
+      const error1 = errorCreator(validThings, article_id, 404, 'article');
       if (error1) return Promise.reject(error1);
-      else {
-        return Promise.all([
-          Article.find()
+
+      return Promise.all([
+        Article.find()
           .populate('created_by')
-            .where(id.parameter)
-            .equals(id.identifier)
-            .lean(),
-          commentCount(
-            Comment,
-            'belongs_to',
-            id.model,
-            id.parameter,
-            id.identifier
-          )
-        ]);
-      }
+          .where('_id')
+          .equals(article_id)
+          .lean(),
+        commentCount(Comment, 'belongs_to', Article, '_id', article_id)
+      ]);
     })
     .then(([foundArticles, countValue]) => {
       const outputArticles = foundArticles.map(article => {
-        article['comment_count'] = countValue;
+        article.comment_count = countValue;
         return article;
       });
       if (foundArticles !== undefined) {
         return res.status(200).send(outputArticles);
-      } else return foundArticles;
-    })
-    .catch(next);
-};
-
-exports.getCommentsByArticle = (req, res, next) => {
-  //GET /api/articles/:article_id/comments
-  return getArrayOfValidElements(Article, '_id')
-    .then(validThings => {
-      const errorChecker1 = errorCreator(
-        validThings,
-        req.params.article_id,
-        404,
-        'article',
-        next
-      );
-      if (errorChecker1) return Promise.reject(errorChecker1);
-      else {
-        return Comment.find()
-          .where('belongs_to')
-          .equals(req.params.article_id)
-          .lean()
-          .populate('created_by');
       }
-    })
-    .then(foundComments => {
-      return res.status(200).send(foundComments);
+      return foundArticles;
     })
     .catch(next);
 };
 
-exports.addCommentsByArticle = (req, res, next) => {
-  return Promise.all([
-    getArrayOfValidElements(Article, '_id'),
-    getArrayOfValidElements(User, '_id')
-  ])
-    .then(([validArticles, validUsers]) => {
-      const errorChecker1 = errorCreator(
-        validArticles,
-        req.params.article_id,
-        400,
-        'article',
-        next
-      );
-      const errorChecker2 = errorCreator(
-        validUsers,
-        req.body.created_by,
-        400,
-        'user',
-        next
-      );
-      if (errorChecker1) return Promise.reject(errorChecker1);
-      if (errorChecker2) return Promise.reject(errorChecker2);
-      if (req.body.body === undefined)
-        return next({
-          status: 400,
-          msg: 'Request did not include a "body" value.'
-        });
-      if (req.body.created_by === undefined)
-        return next({
-          status: 400,
-          msg: 'Request did not include a "created_by" value.'
-        });
-      const newComment = new Comment({
-        body: req.body.body,
-        belongs_to: req.params.article_id,
-        created_by: req.body.created_by
+// GET /api/articles/:article_id/comments
+exports.getCommentsByArticle = (req, res, next) => getArrayOfValidElements(Article, '_id')
+  .then(validThings => {
+    const { article_id } = req.params;
+    const errorChecker1 = errorCreator(validThings, article_id, 404, 'article');
+    if (errorChecker1) return Promise.reject(errorChecker1);
+
+    return Comment.find()
+      .where('belongs_to')
+      .equals(article_id)
+      .lean()
+      .populate('created_by');
+  })
+  .then(foundComments => res.status(200).send(foundComments))
+  .catch(next);
+
+exports.addCommentsByArticle = (req, res, next) => Promise.all([getArrayOfValidElements(Article, '_id'), getArrayOfValidElements(User, '_id')])
+  .then(([validArticles, validUsers]) => {
+    const { article_id } = req.params;
+    const { created_by, body } = req.body;
+
+    const errorChecker1 = errorCreator(validArticles, article_id, 400, 'article');
+    const errorChecker2 = errorCreator(validUsers, created_by, 400, 'user');
+    if (errorChecker1) return Promise.reject(errorChecker1);
+    if (errorChecker2) return Promise.reject(errorChecker2);
+    if (body === undefined) {
+      return Promise.reject({
+        status: 400,
+        msg: 'Request did not include a "body" value.'
       });
-      return newComment.save();
-    })
-    .then(returnedComment => {
-      if (!returnedComment) return Promise.reject({ msg: 'invalid request' });
-      return Comment.findById(returnedComment._id).populate('created_by');
-    })
-    .then(postedArticle => {
-      return res.status(201).send(postedArticle);
-    })
-    .catch(next);
-};
+    }
+    if (created_by === undefined) {
+      return Promise.reject({
+        status: 400,
+        msg: 'Request did not include a "created_by" value.'
+      });
+    }
+    const newComment = new Comment({
+      body,
+      belongs_to: article_id,
+      created_by
+    });
+    return newComment.save();
+  })
+  .then(returnedComment => {
+    if (!returnedComment) return Promise.reject({ msg: 'invalid request' });
+    return Comment.findById(returnedComment._id).populate('created_by');
+  })
+  .then(postedArticle => res.status(201).send(postedArticle))
+  .catch(next);
 
 exports.changeVotes = (req, res, next) => {
-  const id = {
-    model: Article,
-    identifier: req.params.article_id,
-    parameter: '_id',
-    name: 'article'
-  };
-  return getArrayOfValidElements(id.model, id.parameter)
+  const { article_id } = req.params;
+  const { vote } = req.query;
+  return getArrayOfValidElements(Article, '_id')
     .then(validThings => {
-      const errorChecker = errorCreator(
-        validThings,
-        id.identifier,
-        404,
-        id.name,
-        next
-      );
+      const errorChecker = errorCreator(validThings, article_id, 404, 'article');
       if (errorChecker) return Promise.reject(errorChecker);
       const queryKeys = Object.keys(req.query);
       if (queryKeys.length > 0 && !queryKeys.includes('vote')) {
         return Promise.reject({ status: 400, msg: 'Not a valid query.' });
       }
-      if (req.query.vote !== 'up' && req.query.vote !== 'down')
-        return Promise.reject({ status: 400, msg: 'Not a valid query key.' });
+      if (vote !== 'up' && vote !== 'down') return Promise.reject({ status: 400, msg: 'Not a valid query key.' });
       return Promise.all([
         Article.find()
           .where('_id')
-          .equals(req.params.article_id)
+          .equals(article_id)
           .populate('created_by'),
-        commentCount(
-          Comment,
-          'belongs_to',
-          id.model,
-          id.parameter,
-          id.identifier
-        )
+        commentCount(Comment, 'belongs_to', Article, '_id', article_id)
       ]);
     })
     .then(([foundArticle, countValue]) => {
-      const newVotes =
-        req.query.vote === 'up'
-          ? foundArticle[0].votes + 1
-          : foundArticle[0].votes - 1;
+      const newVotes = vote === 'up' ? foundArticle[0].votes + 1 : foundArticle[0].votes - 1;
       return Article.findByIdAndUpdate(
-        req.params.article_id,
+        article_id,
         { votes: newVotes },
         { new: true },
         (err, func) => {
@@ -189,8 +121,6 @@ exports.changeVotes = (req, res, next) => {
         }
       );
     })
-    .then(updatedArticles => {
-      return res.status(201).send(updatedArticles);
-    })
+    .then(updatedArticles => res.status(201).send(updatedArticles))
     .catch(next);
 };
