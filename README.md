@@ -1,8 +1,18 @@
 # Northcoders News
 
-This is an API to serve Northcoders-related news from a Mongo database. A working version can be found at: [https://frozen-river-28585.herokuapp.com/api](https://frozen-river-28585.herokuapp.com/api).
+This is the backend of a full stack reddit-style message board written in React, completed as part of the intensive full time Developer Pathway software development course at [Northcoders](http://www.northcoders.com) in Manchester between October and December 2018.
 
-## Getting Started
+- The deployed version of the site can be found here: [http://confident-gates-cb16d1.netlify.com](http://confident-gates-cb16d1.netlify.com).
+- The deployed API for the backend can be found here: [https://frozen-river-28585.herokuapp.com/api](https://frozen-river-28585.herokuapp.com/api)
+- The github repo for the frontend API can be found here: [https://github.com/dpocknee/nc-news_frontend](https://github.com/dpocknee/nc-news_frontend)
+
+The backend consists of a RESTful API which allows access to a Mongo database hosted on mLab.
+
+The frontend serves this data in a dynamic React application.
+
+Users can vote on articles and comments, and logged-in users can add or delete comments or articles.
+
+## Installing
 
 1. Fork and clone down this .git repository.
 2. For testing and development you will need to add a config.js file into the root folder. This file should look like this:
@@ -22,28 +32,27 @@ module.exports = config;
 
 3. Run `npm install` to install any dependencies.
 
-### Prerequisites
+## Prerequisites
 
-You will need node.js as well as a server to host all of the javascript files, as well as somewhere to host the Mongo database (I used heroku and mLab).
+- node
+- mongoDB
 
-### Installing
+## Getting Started: Using the API locally
 
-A development environment can be set up by first seeding the dev database
+1. First, make sure that you have mongoDB installed and that `mongod` is running.
 
-```
-npm run seed:dev
-```
+2. Seed the database with data. If you are wanting to run the API in `dev` mode, use the command `npm run seed:dev`.
 
-Seeding can be done using `npm run seed:dev` or `npm run seed:test`, depending upon whether you want to seed the test or dev database.
+3. Navigate to the folder and run `npm start`, this will start up a local server on port 9090.
+
+4. Open a browser of your choice and navigate to `localhost:9090/api`. This will give you a list of possible API endpoints, all of which you can navigate to.
 
 ## Running the tests
 
-All tests are run using `mocha, chai and supertest`.
-Tests can be run using `npm test`.
-
-### Break down into end to end tests
-
-The tests check all api endpoints.
+All tests are run using `mocha`, `chai` and `supertest`.
+The tests check all API endpoints and automatically reseed the test database before each test is run.
+All tests can be run using `npm test`.
+If you want to reseed the test database manually, you can use the command `npm run seed:test`
 
 ## Built With
 
@@ -52,10 +61,6 @@ The tests check all api endpoints.
 ## Authors
 
 - **David Pocknee** - [dpocknee](https://github.com/dpocknee)
-
-## License
-
-Anti-copyright
 
 ## Acknowledgments
 
