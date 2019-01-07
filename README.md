@@ -1,4 +1,4 @@
-# Northcoders News
+# Northcoders News (Backend)
 
 This is the backend of a full stack reddit-style message board written in React, completed as part of the intensive full time Developer Pathway software development course at [Northcoders](http://www.northcoders.com) in Manchester between October and December 2018.
 
